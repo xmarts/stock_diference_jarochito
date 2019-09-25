@@ -2,6 +2,26 @@
 
 from odoo import models, fields, api
 
+class StockMove(models.Model):
+	"""Agrega campos al stock.move"""
+	_inherit = 'stock.move'
+	return_qty = fields.Float(
+	    string='Cantidad Retornada',
+	)
+	sale_qty = fields.Float(
+	    string='Cantidad Vendida',
+	)
+	diference_qty = fields.Float(
+	    string='Diferencia',
+	)
+	
+class StockPicking(models.Model):
+	"""Agrega campos al stock.picking"""
+	_inherit = 'stock.picking'
+	is_to_route = fields.Boolean(string='Para Ruta')
+	user_route_id = fields.Many2one(comodel_name='res.user', string='Usuario de ruta')
+	
+
 # class stock_diference_jarochito(models.Model):
 #     _name = 'stock_diference_jarochito.stock_diference_jarochito'
 
