@@ -20,7 +20,10 @@ class StockPicking(models.Model):
 	_inherit = 'stock.picking'
 	is_to_route = fields.Boolean(string='Para Ruta')
 	user_route_id = fields.Many2one(comodel_name='res.user', string='Usuario de ruta')
-	
+
+class PosSession(models.model):
+	_inherit = 'pos.session'
+	stock_picking_id = fields.Many2one(comodel_name="stock.picking", string="Inventario entregado")
 
 # class stock_diference_jarochito(models.Model):
 #     _name = 'stock_diference_jarochito.stock_diference_jarochito'
