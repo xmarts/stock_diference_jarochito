@@ -21,7 +21,7 @@ class StockPicking(models.Model):
 	is_to_route = fields.Boolean(string='Para Ruta')
 	user_route_id = fields.Many2one(comodel_name='res.user', string='Usuario de ruta')
 
-class PosSession(models.model):
+class PosSession(models.Model):
 	_inherit = 'pos.session'
 	stock_picking_id = fields.Many2one(comodel_name="stock.picking", string="Inventario entregado")
 

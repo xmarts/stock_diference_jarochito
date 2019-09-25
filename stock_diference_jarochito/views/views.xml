@@ -1,5 +1,16 @@
 <odoo>
   <data>
+  <!-- model.name inherit form view -->
+  <record id="add_field_picking_pos_session" model="ir.ui.view">
+    <field name="name">add_field_picking_pos_session</field>
+    <field name="model">pos.session</field>
+    <field name="inherit_id" ref="point_of_sale.view_pos_session_form"/>
+    <field name="arch" type="xml">
+      <field name="config_id" position="after">
+        <field name="stock_picking_id" />
+      </field>
+    </field>
+  </record>
     <!-- explicit list view definition -->
     <!--
     <record model="ir.ui.view" id="stock_diference_jarochito.list">
