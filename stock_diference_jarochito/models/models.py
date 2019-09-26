@@ -2,9 +2,12 @@
 
 from odoo import models, fields, api
 
-class StockMove(models.Model):
-	"""Agrega campos al stock.move"""
-	_inherit = 'stock.move'
+class StockMoveRoute(models.Model):
+	"""Agrega tabla para diferencias de entrega al stock.move"""
+	_name = 'stock.move.route'
+
+	product_id = fields.Many2many(comodel_name='product.product', string='Producto Cargado')
+	
 	return_qty = fields.Float(
 	    string='Cantidad Retornada',
 	)
@@ -15,6 +18,10 @@ class StockMove(models.Model):
 	    string='Diferencia',
 	)
 	
+class StockMove(models.Model):
+	_inherit = 'stock.move'
+
+
 class StockPicking(models.Model):
 	"""Agrega campos al stock.picking"""
 	_inherit = 'stock.picking'
