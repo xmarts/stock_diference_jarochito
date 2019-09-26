@@ -1,2 +1,3 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_stock_diference_jarochito_stock_diference_jarochito,stock_diference_jarochito.stock_diference_jarochito,model_stock_diference_jarochito_stock_diference_jarochito,,1,0,0,0
+access_stock_move_route,stock_move_route,model_stock_move_route,base.group_erp_manager,1,1,1,1
+access_public_stock_move_route,stock_move_route,model_stock_move_route,,1,0,0,0

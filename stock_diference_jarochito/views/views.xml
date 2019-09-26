@@ -11,6 +11,26 @@
       </field>
     </field>
   </record>
+  <record id="add_field_route_moves" model="ir.ui.view">
+    <field name="name">add_field_route_moves</field>
+    <field name="model">stock.picking</field>
+    <field name="inherit_id" ref="stock.view_picking_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//notebook"  position="inside">
+        <page string="Diferencia Ruta">
+          <field name="route_moves" >
+            <tree editable="bottom" >
+              <field name="product_id" />
+              <field name="return_qty" />
+              <field name="sale_qty" />
+              <field name="diference_qty" />
+              <field name="stock_picking_id" invisible="1" />
+            </tree>
+          </field>
+        </page>
+      </xpath>
+    </field>
+  </record>
     <!-- explicit list view definition -->
     <!--
     <record model="ir.ui.view" id="stock_diference_jarochito.list">
