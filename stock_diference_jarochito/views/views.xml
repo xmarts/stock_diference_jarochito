@@ -17,10 +17,11 @@
     <field name="inherit_id" ref="stock.view_picking_form"/>
     <field name="arch" type="xml">
       <xpath expr="//notebook"  position="inside">
-        <page string="Diferencia Ruta">
+        <page string="Diferencia Ruta" >
           <field name="route_moves" >
             <tree editable="bottom" >
               <field name="product_id" />
+              <field name="charge_qty" />
               <field name="return_qty" />
               <field name="sale_qty" />
               <field name="diference_qty" />
