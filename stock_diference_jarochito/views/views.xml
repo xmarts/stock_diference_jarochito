@@ -33,8 +33,13 @@
       <xpath expr="//field[@name='picking_type_id']" position="after">
         <field name="chofer" attrs="{'invisible':[('interno','!=',True)]}" />
         <field name="interno"/>
-        <field name="subpedido_id" invisible="0"/>
+        <field name="subpedido_id" invisible="1"/>
         <field name="total_difencia" invisible="1"/>
+         
+        <field name="pos_confi"/>
+        <field name="pos_secion"/>
+        <button name="product_pos" string="PRuebaa" type="object"/>           
+
       </xpath>
 
       <xpath expr="//button[@name='button_scrap']" position="after">

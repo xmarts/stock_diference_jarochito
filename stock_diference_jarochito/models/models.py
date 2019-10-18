@@ -35,6 +35,11 @@ class StockPicking(models.Model):
 	subpedido_id = fields.Many2one('sale.order',string="pedido venta")
 	total_difencia = fields.Integer(string="Total diferencia")
 
+	pos_confi = fields.Many2one('pos.config',string="Punto venta")
+	pos_secion = fields.Many2one('pos.session',string="Seccion", domain="[('config_id','=',pos_confi)]")
+
+
+
 	def change_route_moves(self):
 		self.route_moves = [(5, 0, 0)]
 		res = {'value':{'route_moves':[],}}
@@ -92,6 +97,24 @@ class StockPicking(models.Model):
 		                            })							
 			else:
 				raise ValidationError('Este empleado no tiene usuario, asignale un usuario')
+	@api.multi
+	def product_pos(self):
+		if self.interno == True:
+			searc_pedido = self.env['pos.order'].search([('session_id','=',self.pos_secion.id),])
+
+			print('pruebaa',searc_pedido.ids)
+
+			searc_lines = self.env['pos.order.line'].search([('order_id','in',searc_pedido.ids),])
+			print('LINEAS',searc_lines.ids)
+			cont= 0
+			for line in searc_lines:
+				if line:
+					bus = self.env['stock.move.route'].search([('product_id','=',line.product_id.ids)])
+					print('asasa',bus)
+
+
+
+
 
 class returns_tras(models.TransientModel):
 	_inherit = 'stock.return.picking'
@@ -108,11 +131,9 @@ class returns_tras(models.TransientModel):
 						else:
 							raise ValidationError('Pedido no validado')
 				else:
-					return super(returns_tras,self).create_returns()
-								
+					return super(returns_tras,self).create_returns()								
 			else:
-				return super(returns_tras,self).create_returns()
-							
+				return super(returns_tras,self).create_returns()							
 
 
 
