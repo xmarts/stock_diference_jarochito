@@ -15,7 +15,7 @@ class StockMoveRoute(models.Model):
 	    string='Cantidad Retornada',
 	)
 	sale_qty = fields.Float(
-	    string='Cantidad Vendida',
+	    string='Cantidad Vendida',readonly=True
 	)
 	diference_qty = fields.Float(
 	    string='Diferencia',
@@ -32,7 +32,7 @@ class StockPicking(models.Model):
 	route_moves = fields.One2many('stock.move.route','stock_picking_id', string='Tabla Diferencias')
 	chofer = fields.Many2one('hr.employee',string="Chofer")
 	interno = fields.Boolean(string="Orden de ruta")
-	subpedido_id = fields.Many2one('sale.order',string="pedido venta")
+	subpedido_id = fields.Many2one('sale.order',string="pedido venta",readonly=True)
 	total_difencia = fields.Integer(string="Total diferencia")
 
 	pos_confi = fields.Many2one('pos.config',string="Punto venta")
@@ -101,17 +101,15 @@ class StockPicking(models.Model):
 	def product_pos(self):
 		if self.interno == True:
 			searc_pedido = self.env['pos.order'].search([('session_id','=',self.pos_secion.id),])
-
-			print('pruebaa',searc_pedido.ids)
-
-			searc_lines = self.env['pos.order.line'].search([('order_id','in',searc_pedido.ids),])
-			print('LINEAS',searc_lines.ids)
-			cont= 0
-			for line in searc_lines:
-				if line:
-					bus = self.env['stock.move.route'].search([('product_id','=',line.product_id.ids)])
-					print('asasa',bus)
-
+			for x in self.route_moves:
+				searc_lines = self.env['pos.order.line'].search([('order_id','in',searc_pedido.ids),('product_id','=',x.product_id.id)])
+				if  searc_lines:
+					x.sale_qty = 0	
+					for line in searc_lines:
+						x.sale_qty += line.qty
+				else:
+					x.sale_qty = 0		
+					
 
 
 

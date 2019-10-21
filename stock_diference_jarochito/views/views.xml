@@ -33,18 +33,22 @@
       <xpath expr="//field[@name='picking_type_id']" position="after">
         <field name="chofer" attrs="{'invisible':[('interno','!=',True)]}" />
         <field name="interno"/>
-        <field name="subpedido_id" invisible="1"/>
-        <field name="total_difencia" invisible="1"/>
-         
-        <field name="pos_confi"/>
-        <field name="pos_secion"/>
-        <button name="product_pos" string="PRuebaa" type="object"/>           
-
+        <field name="total_difencia" invisible="1"/>         
+        <field name="pos_confi" attrs="{'invisible':[('interno','!=',True)]}"/>        
+            
+        <field name="pos_secion" attrs="{'invisible':[('interno','!=',True)]}"/>
+        <button name="product_pos" string="Comprobar diferencias" type="object" attrs="{'invisible':[('interno','!=',True)]}"/> 
       </xpath>
+
 
       <xpath expr="//button[@name='button_scrap']" position="after">
         <button name="create_venta_dos" string="Crear venta" type="object" class="oe_highlight" attrs="{'invisible':['|',('total_difencia','=',0),'|',('interno','!=',True)],}" />
       </xpath> 
+      <xpath expr="//field[@name='origin']" position="after">
+
+        <field name="subpedido_id" invisible="0"  attrs="{'invisible':['|',('total_difencia','=',0),'|',('interno','!=',True)],}" />
+        
+      </xpath>
     </field>
   </record>
 
