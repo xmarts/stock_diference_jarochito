@@ -79,6 +79,7 @@ class StockPicking(models.Model):
 		if self.total_difencia >0:
 			for r in self.route_moves:				
 				total = r.diference_qty * r.product_id.lst_price
+				
 			if self.chofer.user_id:
 				so=self.env['pos.order'].create({'name': self.env['ir.sequence'].next_by_code('pos.order') or _('New'),
 					'session_id':self.pos_secion.id,
