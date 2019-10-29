@@ -77,8 +77,9 @@ class StockPicking(models.Model):
 	@api.multi
 	def create_venta_dos(self):
 		if self.total_difencia >0:
+			for r in self.route_moves:				
+				total = r.diference_qty * r.product_id.lst_price
 			if self.chofer.user_id:
-				total = self.route_moves.diference_qty * self.route_moves.product_id.lst_price
 				so=self.env['pos.order'].create({'name': self.env['ir.sequence'].next_by_code('pos.order') or _('New'),
 					'session_id':self.pos_secion.id,
 					'amount_tax':0,
