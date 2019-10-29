@@ -32,7 +32,7 @@ class StockPicking(models.Model):
 	route_moves = fields.One2many('stock.move.route','stock_picking_id', string='Tabla Diferencias')
 	chofer = fields.Many2one('hr.employee',string="Chofer")
 	interno = fields.Boolean(string="Orden de ruta")
-	subpedido_id = fields.Many2one('sale.order',string="pedido venta",readonly=True)
+	subpedido_id = fields.Many2one('pos.order',string="pedido venta",readonly=True)
 	total_difencia = fields.Integer(string="Total diferencia")
 
 	pos_confi = fields.Many2one('pos.config',string="Punto venta")
@@ -78,9 +78,14 @@ class StockPicking(models.Model):
 	def create_venta_dos(self):
 		if self.total_difencia >0:
 			if self.chofer.user_id:
-				so=self.env['sale.order'].create({'name': self.env['ir.sequence'].next_by_code('sale.order') or _('New'),
-					'partner_id':self.chofer.user_id.partner_id.id,
-					'origin':self.name,
+				total = self.route_moves.diference_qty * self.route_moves.product_id.lst_price
+				so=self.env['pos.order'].create({'name': self.env['ir.sequence'].next_by_code('pos.order') or _('New'),
+					'session_id':self.pos_secion.id,
+					'amount_tax':0,
+					'amount_total':total,
+					'amount_paid':total,
+					'amount_return':0,
+
 					})
 				self.subpedido_id = so.id
 				for lx in self:
@@ -89,10 +94,14 @@ class StockPicking(models.Model):
 						for line in lx.route_moves:
 							if line.diference_qty >0 :
 								con += 1
-								self.env['sale.order.line'].create({
+								neto = line.diference_qty * line.product_id.lst_price
+								self.env['pos.order.line'].create({
 		                            'product_id': line.product_id.id,
-		                            'product_uom_qty':line.diference_qty,
+		                            'qty':line.diference_qty,
 		                            'price_unit':line.product_id.lst_price,
+		                            'tax_ids_after_fiscal_position':'IVA(0%) VENTAS', 
+		                            'price_subtotal': neto,
+		                            'price_subtotal_incl':neto, 
 		                            'order_id': so.id
 		                            })							
 			else:
