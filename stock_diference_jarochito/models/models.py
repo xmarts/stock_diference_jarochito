@@ -44,13 +44,13 @@ class StockPicking(models.Model):
 	def change_route_moves(self):
 		self.route_moves = [(5, 0, 0)]
 		res = {'value':{'route_moves':[],}}
-		for x in self.move_ids_without_package:
-			self.route_moves.create({
-				'product_id': x.product_id.id,
-				'charge_qty': x.quantity_done,
-				'stock_picking_id': self.id,
-			})
-			print("PRODUCTO >>>>>>>>>>>>>>>>>> ",x.product_id.name)
+		# for x in self.move_ids_without_package:
+		# 	self.route_moves.create({
+		# 		'product_id': x.product_id.id,
+		# 		'charge_qty': x.quantity_done,
+		# 		'stock_picking_id': self.id,
+		# 	})
+		# 	print("PRODUCTO >>>>>>>>>>>>>>>>>> ",x.product_id.name)
 		prods = self.env['stock.quant'].search([('location_id','=',self.location_dest_id.id)])
 		for x in prods:
 			print(x.product_id.name,x.quantity)
