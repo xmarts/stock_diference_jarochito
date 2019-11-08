@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, fields, api
+from odoo import models, fields, api, _
+from datetime import datetime, date, timedelta
 from odoo.exceptions import AccessError, UserError, RedirectWarning, ValidationError, Warning
 
 class StockMoveRoute(models.Model):
@@ -9,16 +10,16 @@ class StockMoveRoute(models.Model):
 
 	product_id = fields.Many2one('product.product', string='Producto Cargado')
 	charge_qty = fields.Float(
-	    string='Cantidad Cargada',
+		string='Cantidad Cargada',
 	)
 	return_qty = fields.Float(
-	    string='Cantidad Retornada',
+		string='Cantidad Retornada',
 	)
 	sale_qty = fields.Float(
-	    string='Cantidad Vendida',readonly=True
+		string='Cantidad Vendida',readonly=True
 	)
 	diference_qty = fields.Float(
-	    string='Diferencia',
+		string='Diferencia',
 	)
 	stock_picking_id = fields.Many2one("stock.picking")
 	
@@ -39,7 +40,7 @@ class StockPicking(models.Model):
 	pos_secion = fields.Many2one('pos.session',string="Seccion", domain="[('config_id','=',pos_confi)]")
 
 
-
+	@api.multi
 	def change_route_moves(self):
 		self.route_moves = [(5, 0, 0)]
 		res = {'value':{'route_moves':[],}}
@@ -50,13 +51,40 @@ class StockPicking(models.Model):
 				'stock_picking_id': self.id,
 			})
 			print("PRODUCTO >>>>>>>>>>>>>>>>>> ",x.product_id.name)
-	
+		prods = self.env['stock.quant'].search([('location_id','=',self.location_dest_id.id)])
+		for x in prods:
+			print(x.product_id.name,x.quantity)
+			e = False
+			for z in self.route_moves:
+				if z.product_id == x.product_id:
+					z.charge_qty += x.quantity
+					e = True
+			if e == False:
+				self.route_moves.create({
+					'product_id': x.product_id.id,
+					'charge_qty': x.quantity,
+					'stock_picking_id': self.id,
+				})
+
 	@api.multi
-	def button_validate(self):
-		record = super(StockPicking, self).button_validate()
-		#if self.state == 'done':
-		self.change_route_moves()
-		return record
+	def product_pos(self):
+		if self.interno == True:
+			searc_pedido = self.env['pos.order'].search([('session_id','=',self.pos_secion.id),])
+			for x in self.route_moves:
+				searc_lines = self.env['pos.order.line'].search([('order_id','in',searc_pedido.ids),('product_id','=',x.product_id.id)])
+				if  searc_lines:
+					x.sale_qty = 0	
+					for line in searc_lines:
+						x.sale_qty += line.qty
+				else:
+					x.sale_qty = 0	
+	
+	# @api.multi
+	# def button_validate(self):
+	# 	record = super(StockPicking, self).button_validate()
+	# 	#if self.state == 'done':
+	# 	self.change_route_moves()
+	# 	return record
 
 	@api.onchange('route_moves')
 	def _function_route_moves(self):
@@ -84,43 +112,51 @@ class StockPicking(models.Model):
 				so=self.env['pos.order'].create({'name': self.env['ir.sequence'].next_by_code('pos.order') or _('New'),
 					'session_id':self.pos_secion.id,
 					'amount_tax':0,
+					'state':'paid',
 					'amount_total':total,
 					'amount_paid':total,
 					'amount_return':0,
+					'partner_id': self.chofer.user_id.partner_id.id
 
 					})
 				self.subpedido_id = so.id
 				for lx in self:
+					total = 0
 					if lx.route_moves:
 						con = 0 
 						for line in lx.route_moves:
 							if line.diference_qty >0 :
 								con += 1
 								neto = line.diference_qty * line.product_id.lst_price
+								total += neto
 								self.env['pos.order.line'].create({
-		                            'product_id': line.product_id.id,
-		                            'qty':line.diference_qty,
-		                            'price_unit':line.product_id.lst_price,
-		                            'tax_ids_after_fiscal_position':'IVA(0%) VENTAS', 
-		                            'price_subtotal': neto,
-		                            'price_subtotal_incl':neto, 
-		                            'order_id': so.id
-		                            })							
+									'product_id': line.product_id.id,
+									'qty':line.diference_qty,
+									'price_unit':line.product_id.lst_price,
+									'tax_ids':[(6,0,line.product_id.taxes_id.ids)], 
+									'price_subtotal': neto,
+									'price_subtotal_incl':neto, 
+									'order_id': so.id
+									})	
+					self.subpedido_id.amount_total = total	
+					self.subpedido_id.amount_paid = total	
+					statement = self.env['account.bank.statement'].search([('pos_session_id','=',self.pos_secion.id)])
+					vars = {
+						'name' : so.name,
+						'date' : date.today(),
+						'amount' : total,
+						'account_id' : self.subpedido_id.session_id.config_id.journal_id.id,
+						'statement_id' : statement.id,
+						'journal_id' : self.pos_confi.journal_id.id,
+						'ref' : self.pos_secion.name,
+						'sequence' : '1',
+						'company_id' : self.pos_confi.company_id.id,
+						'pos_statement_id' : self.subpedido_id.id,
+						'partner_id' : self.chofer.user_id.partner_id.id,
+					}	
+					self.env['account.bank.statement.line'].create(vars)
 			else:
-				raise ValidationError('Este empleado no tiene usuario, asignale un usuario')
-	@api.multi
-	def product_pos(self):
-		if self.interno == True:
-			searc_pedido = self.env['pos.order'].search([('session_id','=',self.pos_secion.id),])
-			for x in self.route_moves:
-				searc_lines = self.env['pos.order.line'].search([('order_id','in',searc_pedido.ids),('product_id','=',x.product_id.id)])
-				if  searc_lines:
-					x.sale_qty = 0	
-					for line in searc_lines:
-						x.sale_qty += line.qty
-				else:
-					x.sale_qty = 0		
-					
+				raise ValidationError('Este empleado no tiene usuario, asignale un usuario')					
 
 
 
@@ -162,14 +198,14 @@ class PosSession(models.Model):
 
 
 # class stock_diference_jarochito(models.Model):
-#     _name = 'stock_diference_jarochito.stock_diference_jarochito'
+#	 _name = 'stock_diference_jarochito.stock_diference_jarochito'
 
-#     name = fields.Char()
-#     value = fields.Integer()
-#     value2 = fields.Float(compute="_value_pc", store=True)
-#     description = fields.Text()
+#	 name = fields.Char()
+#	 value = fields.Integer()
+#	 value2 = fields.Float(compute="_value_pc", store=True)
+#	 description = fields.Text()
 #
-#     @api.depends('value')
-#     def _value_pc(self):
-#         self.value2 = float(self.value) / 100
-#         
+#	 @api.depends('value')
+#	 def _value_pc(self):
+#		 self.value2 = float(self.value) / 100
+#		 
