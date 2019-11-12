@@ -66,6 +66,8 @@ class StockPicking(models.Model):
 					'stock_picking_id': self.id,
 				})
 
+
+
 	@api.multi
 	def product_pos(self):
 		if self.interno == True:
@@ -129,13 +131,35 @@ class StockPicking(models.Model):
 								con += 1
 								neto = line.diference_qty * line.product_id.lst_price
 								total += neto
+								price = neto
+								taxs = line.product_id.taxes_id.filtered(lambda r: not self.company_id or r.company_id == self.company_id)
+								lista = []
+								ieps_amount = 0
+								for x in taxs:
+									ieps = False
+									for z in x.tag_ids:
+										if z.name == 'IEPS':
+											ieps = True
+									if ieps == False:
+										lista.append(x.id)
+								for x in line.product_id.taxes_id:
+									ieps = False
+									for z in x.tag_ids:
+										if z.name == 'IEPS':
+											ieps = True
+									if ieps == True:
+										ieps_amount += x.amount
+								#price = price - ieps_amount
+								mytaxes = self.env['account.tax'].search([('id','in',lista)])
+								taxes = mytaxes.compute_all(price, self.company_id.currency_id, line.diference_qty, product=line.product_id, partner=self.chofer.user_id.partner_id)
+								
 								self.env['pos.order.line'].create({
 									'product_id': line.product_id.id,
 									'qty':line.diference_qty,
 									'price_unit':line.product_id.lst_price,
 									'tax_ids':[(6,0,line.product_id.taxes_id.ids)], 
-									'price_subtotal': neto,
-									'price_subtotal_incl':neto, 
+									'price_subtotal': taxes['total_excluded'],
+									'price_subtotal_incl':taxes['total_included'], 
 									'order_id': so.id
 									})	
 					self.subpedido_id.amount_total = total	
