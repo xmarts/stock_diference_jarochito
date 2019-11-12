@@ -20,9 +20,14 @@ class StockMoveRoute(models.Model):
 	)
 	diference_qty = fields.Float(
 		string='Diferencia',
+		compute="compute_diference"
 	)
 	stock_picking_id = fields.Many2one("stock.picking")
 	
+
+	@api.one
+	def compute_diference(self):
+		self.diference_qty = self.charge_qty - self.return_qty - self.sale_qty
 
 
 class StockPicking(models.Model):
