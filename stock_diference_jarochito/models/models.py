@@ -140,23 +140,23 @@ class StockPicking(models.Model):
 								taxs = line.product_id.taxes_id.filtered(lambda r: not self.company_id or r.company_id == self.company_id)
 								lista = []
 								ieps_amount = 0
-								for x in taxs:
-									ieps = False
-									for z in x.tag_ids:
-										if z.name == 'IEPS':
-											ieps = True
-									if ieps == False:
-										lista.append(x.id)
-								for x in line.product_id.taxes_id:
-									ieps = False
-									for z in x.tag_ids:
-										if z.name == 'IEPS':
-											ieps = True
-									if ieps == True:
-										ieps_amount += x.amount
-								#price = price - ieps_amount
+								# for x in taxs:
+								# 	ieps = False
+								# 	for z in x.tag_ids:
+								# 		if z.name == 'IEPS':
+								# 			ieps = True
+								# 	if ieps == False:
+								# 		lista.append(x.id)
+								# for x in line.product_id.taxes_id:
+								# 	ieps = False
+								# 	for z in x.tag_ids:
+								# 		if z.name == 'IEPS':
+								# 			ieps = True
+								# 	if ieps == True:
+								# 		ieps_amount += x.amount
+								# #price = price - ieps_amount
 								mytaxes = self.env['account.tax'].search([('id','in',lista)])
-								taxes = mytaxes.compute_all(price, self.company_id.currency_id, line.diference_qty, product=line.product_id, partner=self.chofer.user_id.partner_id)
+								taxes = taxs.compute_all(price, self.company_id.currency_id, line.diference_qty, product=line.product_id, partner=self.chofer.user_id.partner_id)
 								
 								self.env['pos.order.line'].create({
 									'product_id': line.product_id.id,
