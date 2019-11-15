@@ -32,9 +32,10 @@
       </xpath>
       <xpath expr="//field[@name='picking_type_id']" position="after">
         <field name="interno"/>
-        <field name="chofer" attrs="{'invisible':[('interno','!=',True)],'required':[('interno','=',True)]}" />
-        <field name="total_difencia" invisible="1"/>         
-        <field name="pos_confi" attrs="{'invisible':[('interno','!=',True)],'required':[('interno','=',True)]}" />   
+        <field name="ruta" attrs="{'invisible':[('interno','!=',True)],'required':[('interno','=',True)]}" /> 
+        <field name="pos_confi" attrs="{'invisible':[('interno','!=',True)]}" />  
+        <field name="chofer" attrs="{'invisible':[('interno','!=',True)]}" />
+        <field name="total_difencia" invisible="1"/>          
         <field name="pos_secion" attrs="{'invisible':[('interno','!=',True)],'required':[('interno','=',True)]}" />
         <button name="change_route_moves" string="Calcular Carga" type="object" attrs="{'invisible':[('interno','!=',True)]}"/> 
         <button name="product_pos" string="Calcular Diferencia" type="object" attrs="{'invisible':[('interno','!=',True)]}"/> 

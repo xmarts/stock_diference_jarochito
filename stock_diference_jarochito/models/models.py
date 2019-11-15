@@ -36,14 +36,19 @@ class StockPicking(models.Model):
 	is_to_route = fields.Boolean(string='Para Ruta')
 	user_route_id = fields.Many2one(comodel_name='res.user', string='Usuario de ruta')
 	route_moves = fields.One2many('stock.move.route','stock_picking_id', string='Tabla Diferencias')
-	chofer = fields.Many2one('hr.employee',string="Chofer")
+	ruta = fields.Many2one('res.zona', string="Ruta")
+	chofer = fields.Many2one('hr.employee',string="Chofer", related="ruta.user_id")
 	interno = fields.Boolean(string="Orden de ruta")
 	subpedido_id = fields.Many2one('pos.order',string="pedido venta",readonly=True)
 	total_difencia = fields.Integer(string="Total diferencia")
 
-	pos_confi = fields.Many2one('pos.config',string="Punto venta")
-	pos_secion = fields.Many2one('pos.session',string="Seccion", domain="[('config_id','=',pos_confi)]")
+	pos_confi = fields.Many2one('pos.config',string="Punto venta", related="ruta.pos_id")
+	pos_secion = fields.Many2one('pos.session',string="Sesion POS", domain="[('config_id','=',pos_confi)]")
 
+	@api.onchange('pos_confi')
+	def onchange_pos_confi(self):
+		last_session = self.env['pos.session'].search([('config_id','=',self.pos_confi.id)],limit=1)
+		self.pos_secion = last_session.id
 
 	@api.multi
 	def change_route_moves(self):
