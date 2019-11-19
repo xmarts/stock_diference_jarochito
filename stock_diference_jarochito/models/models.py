@@ -134,12 +134,27 @@ class StockPicking(models.Model):
 				self.subpedido_id = so.id
 				for lx in self:
 					total = 0
+					impuestos = 0
 					if lx.route_moves:
 						con = 0 
 						for line in lx.route_moves:
 							if line.diference_qty >0 :
 								con += 1
-								neto = line.diference_qty * line.product_id.lst_price
+								neto = 0
+								price_unit = 0
+								if self.chofer.user_id.partner_id.property_product_pricelist:
+									pricelist = self.chofer.user_id.partner_id.property_product_pricelist
+									producttmpl = self.env['product.template'].search([('id','=',line.product_id.product_tmpl_id.id)])
+									productpricelist = self.env['product.pricelist.item'].search([('product_tmpl_id','=',producttmpl.id),('pricelist_id','=',pricelist.id)])
+									if productpricelist:
+										neto = float(line.diference_qty) * float(productpricelist.fixed_price)
+										price_unit = productpricelist.fixed_price
+									else:
+										neto = line.diference_qty * line.product_id.lst_price
+										price_unit = line.product_id.lst_price
+								else:
+									neto = line.diference_qty * line.product_id.lst_price
+									price_unit = line.product_id.lst_price
 								total += neto
 								price = neto
 								taxs = line.product_id.taxes_id.filtered(lambda r: not self.company_id or r.company_id == self.company_id)
@@ -162,11 +177,12 @@ class StockPicking(models.Model):
 								# #price = price - ieps_amount
 								mytaxes = self.env['account.tax'].search([('id','in',lista)])
 								taxes = taxs.compute_all(price, self.company_id.currency_id, line.diference_qty, product=line.product_id, partner=self.chofer.user_id.partner_id)
+								impuestos += taxes['total_included'] - taxes['total_excluded']
 								
 								self.env['pos.order.line'].create({
 									'product_id': line.product_id.id,
 									'qty':line.diference_qty,
-									'price_unit':line.product_id.lst_price,
+									'price_unit':price_unit,
 									'tax_ids':[(6,0,line.product_id.taxes_id.ids)], 
 									'price_subtotal': taxes['total_excluded'],
 									'price_subtotal_incl':taxes['total_included'], 
@@ -174,6 +190,7 @@ class StockPicking(models.Model):
 									})	
 					self.subpedido_id.amount_total = total	
 					self.subpedido_id.amount_paid = total	
+					self.subpedido_id.amount_tax = impuestos	
 					statement = self.env['account.bank.statement'].search([('pos_session_id','=',self.pos_secion.id)])
 					vars = {
 						'name' : so.name,
