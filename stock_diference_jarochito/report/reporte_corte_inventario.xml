@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+<odoo>
+	<template id="reporte_corte_inventario">
+		<t t-call="web.html_container">
+			<t t-foreach="docs" t-as="o">
+				<t t-call="web.external_layout">
+					<div class="page">
+
+						<h2>Corte de inventario</h2>
+
+						<div class="row mt32 mb32" id="informations">
+							<div class="col-auto mw-100 mb-2">
+								<strong>Número de inventario:</strong>
+								<p class="m-0" t-field="o.name"/>
+							</div>
+							<div class="col-auto mw-100 mb-2">
+								<strong>Ubicación:</strong>
+								<p class="m-0" t-field="o.location_dest_id"/>
+							</div>
+							<div class="col-auto mw-100 mb-2">
+								<strong>Chofer:</strong>
+								<p class="m-0" t-field="o.chofer"/>
+							</div>
+							<div class="col-auto mw-100 mb-2">
+								<strong>Ruta:</strong>
+								<p class="m-0" t-field="o.ruta"/>
+							</div>
+							<div class="col-auto mw-100 mb-2">
+								<strong>Sesión POS:</strong>
+								<p class="m-0" t-field="o.pos_secion"/>
+							</div>
+							<div class="col-auto mw-100 mb-2">
+								<strong>Branch:</strong>
+								<p class="m-0" t-field="o.branch_id"/>
+							</div>
+						</div>
+
+						<table class="table table-sm o_main_table">
+							<thead>
+								<tr colspan='5'>
+									<th class="text-center"><h4>COTIZACIONES</h4></th>
+								</tr>
+								<tr>
+									<th class="text-left">Producto</th>
+									<th class="text-left">Cargado</th>
+									<th class="text-left">Retornado</th>
+									<th class="text-left">Vendido</th>
+									<th class="text-left">Diferencia</th>
+								</tr>
+							</thead>
+							<tbody class="sale_tbody">
+								<t t-foreach="o.route_moves" t-as="line">
+									<tr>
+										<td><span t-field="line.product_id.name"/></td>
+										<td><span t-field="line.charge_qty"/></td>
+										<td><span t-field="line.return_qty"/></td>
+										<td><span t-field="line.sale_qty"/></td>
+										<td><span t-field="line.diference_qty"/></td>
+									</tr>
+								</t>
+							</tbody>
+						</table>
+
+					</div>
+				</t>
+			</t>
+		</t>
+	</template>
+	<report 
+		id="action_report_corte_inventario"
+		string="Reporte Corte Inventario"
+		model="stock.picking" 
+		report_type="qweb-pdf"
+		file="stock_diference_jarochito.reporte_corte_inventario" 
+		name="stock_diference_jarochito.reporte_corte_inventario"
+		/>
+	</odoo>

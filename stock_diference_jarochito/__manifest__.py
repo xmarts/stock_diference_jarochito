@@ -27,6 +27,8 @@
         'security/ir.model.access.csv',
         'views/views.xml',
         'views/templates.xml',
+        'report/reporte_corte_inventario.xml',
+        'report/corte_de_caja.xml'
     ],
     # only loaded in demonstration mode
     'demo': [

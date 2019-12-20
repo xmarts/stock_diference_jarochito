@@ -63,7 +63,6 @@ class StockPicking(models.Model):
 		# 	print("PRODUCTO >>>>>>>>>>>>>>>>>> ",x.product_id.name)
 		prods = self.env['stock.quant'].search([('location_id','=',self.location_dest_id.id)])
 		for x in prods:
-			print(x.product_id.name,x.quantity)
 			e = False
 			for z in self.route_moves:
 				if z.product_id == x.product_id:
@@ -75,6 +74,7 @@ class StockPicking(models.Model):
 					'charge_qty': x.quantity,
 					'stock_picking_id': self.id,
 				})
+		self.pos_secion.stock_picking_id = self.id
 
 
 
@@ -196,7 +196,7 @@ class StockPicking(models.Model):
 						'name' : so.name,
 						'date' : date.today(),
 						'amount' : total,
-						'account_id' : self.subpedido_id.session_id.config_id.journal_id.id,
+						'account_id' : self.chofer.user_id.partner_id.property_account_receivable_id.id,
 						'statement_id' : statement.id,
 						'journal_id' : self.pos_confi.journal_id.id,
 						'ref' : self.pos_secion.name,

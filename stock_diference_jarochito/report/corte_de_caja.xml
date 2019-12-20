@@ -1,0 +1,95 @@
+<?xml version="1.0"?>
+<odoo>
+    <template id="corte_caja">
+        <t t-call="web.html_container">
+            <h2><t t-esc="fecha"/></h2>
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+
+                        <h2>
+                          
+                                <span>Corte de caja pesos</span>
+                        </h2>
+
+                        <div class="row mt32 mb32" id="informations">
+                            <div class="col-auto mw-100 mb-2">
+                                <strong>Sesion pos:</strong>
+                                <p class="m-0" t-field="o.name"/>
+                            </div>
+                            <div class="col-auto mw-100 mb-2">
+                                <strong>Fecha de apertura:</strong>
+                                <p class="m-0" t-field="o.start_at"/>
+                            </div>
+                            <div class="col-auto mw-100 mb-2">
+                                <strong>Responsable:</strong>
+                                <p class="m-0" t-field="o.user_id.name"/>
+                            </div>
+                             <div class="col-auto mw-100 mb-2">
+                                <strong>Inventario entregado:</strong>
+                                <p class="m-0" t-field="o.stock_picking_id.name"/>
+                            </div>
+                             <div class="col-auto mw-100 mb-2">
+                                <strong>Branch:</strong>
+                                <p class="m-0" t-field="o.branch_id.name"/>
+                            </div>
+                        </div>
+
+                        <table class="table table-sm o_main_table">
+                           
+                          <tr>
+                            <td>Saldo apertura: <span t-field="o.cash_register_balance_start"/> </td>
+                            <td>Saldo real de cierre: <span t-field="o.cash_register_balance_end_real"/> </td>
+                          </tr>
+                           <tr>
+                            <td>Total transacciones: <span t-field="o.cash_register_total_entry_encoding"/></td>
+                            <td>Diferencia: <span t-field="o.cash_register_difference"/></td>
+                          </tr>
+                             <tr>
+                            <td>Saldo teorica de cierre: <span t-field="o.cash_register_balance_end"/></td>
+                            <td></td>
+                          </tr>
+                        </table>
+
+                        <br /><br />
+
+                        <table class="table table-sm o_main_table">
+                            <thead>
+                                <tr>
+                                    <th colspan="2" class="text-center"><h4>Resumen de pagos</h4></th>
+                                </tr>
+                                <tr>
+                                    <th class="text-left">Referencia</th>
+                                    <th class="text-left">Cliente</th>
+                                    <th class="text-left">Diario</th>
+                                    <th class="text-left">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody class="sale_tbody">
+                                <t t-foreach="o.statement_ids" t-as="rec">
+                                    <t t-foreach="rec.line_ids" t-as="line">
+                                        <tr>
+                                            <td><span t-field="line.ref"/></td>
+                                            <td><span t-field="line.partner_id.name"/></td>
+                                            <td><span t-field="rec.journal_id.name"/></td>
+                                            <td><span t-field="line.amount"/></td>
+                                        </tr>
+                                    </t>
+                                </t>
+                            </tbody>
+                        </table>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+    <report 
+        id="action_report_corte_caja"
+        string="Reporte Carga"
+        model="pos.session" 
+        report_type="qweb-pdf"
+        file="stock_diference_jarochito.corte_caja" 
+        name="stock_diference_jarochito.corte_caja"
+        />
+    </odoo>
