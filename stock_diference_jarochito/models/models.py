@@ -145,7 +145,7 @@ class StockPicking(models.Model):
 								if self.chofer.user_id.partner_id.property_product_pricelist:
 									pricelist = self.chofer.user_id.partner_id.property_product_pricelist
 									producttmpl = self.env['product.template'].search([('id','=',line.product_id.product_tmpl_id.id)])
-									productpricelist = self.env['product.pricelist.item'].search([('product_tmpl_id','=',producttmpl.id),('pricelist_id','=',pricelist.id)])
+									productpricelist = pricelist.item_ids.search([('product_tmpl_id','=',producttmpl.id)], limit=1)
 									if productpricelist:
 										neto = float(line.diference_qty) * float(productpricelist.fixed_price)
 										price_unit = productpricelist.fixed_price
@@ -158,8 +158,8 @@ class StockPicking(models.Model):
 								total += neto
 								price = neto
 								taxs = line.product_id.taxes_id.filtered(lambda r: not self.company_id or r.company_id == self.company_id)
-								lista = []
-								ieps_amount = 0
+								# lista = []
+								# ieps_amount = 0
 								# for x in taxs:
 								# 	ieps = False
 								# 	for z in x.tag_ids:
@@ -175,10 +175,9 @@ class StockPicking(models.Model):
 								# 	if ieps == True:
 								# 		ieps_amount += x.amount
 								# #price = price - ieps_amount
-								mytaxes = self.env['account.tax'].search([('id','in',lista)])
+								# mytaxes = self.env['account.tax'].search([('id','in',lista)])
 								taxes = taxs.compute_all(price, self.company_id.currency_id, line.diference_qty, product=line.product_id, partner=self.chofer.user_id.partner_id)
 								impuestos += taxes['total_included'] - taxes['total_excluded']
-								
 								self.env['pos.order.line'].create({
 									'product_id': line.product_id.id,
 									'qty':line.diference_qty,
