@@ -37,17 +37,18 @@
         <field name="chofer" attrs="{'invisible':[('interno','!=',True)]}" />
         <field name="total_difencia" invisible="1"/>          
         <field name="pos_secion" attrs="{'invisible':[('interno','!=',True)],'required':[('interno','=',True)]}" />
-        <button name="change_route_moves" string="Calcular Carga" type="object" attrs="{'invisible':[('interno','!=',True)]}"/> 
-        <button name="product_pos" string="Calcular Diferencia" type="object" attrs="{'invisible':[('interno','!=',True)]}"/> 
+        <button name="change_route_moves" string="Calcular Carga" type="object" attrs="{'invisible':[('interno','!=',True)]}" class="oe_edit_only"/> 
+        <button name="product_pos" string="Calcular Diferencia" type="object" attrs="{'invisible':[('interno','!=',True)]}" class="oe_edit_only"/> 
       </xpath>
 
 
       <xpath expr="//button[@name='button_scrap']" position="after">
-        <button name="create_venta_dos" string="Crear venta" type="object" class="oe_highlight" attrs="{'invisible':['|',('total_difencia','=',0),'|',('interno','!=',True)],}" />
+        <button name="create_venta_dos" string="Liquidar Ruta" type="object" class="oe_highlight" attrs="{'invisible':[('liquida_ruta','!=',True)]}" />
       </xpath> 
       <xpath expr="//field[@name='origin']" position="after">
 
-        <field name="subpedido_id" invisible="0"  attrs="{'invisible':['|',('total_difencia','=',0),'|',('interno','!=',True)],}" />
+        <field name="subpedido_id" attrs="{'invisible':['|',('total_difencia','=',0),'|',('interno','!=',True)]}" />
+        <field name="liquida_ruta" attrs="{'invisible':['|',('total_difencia','=',0),'|',('interno','!=',True)]}" readonly="1"/>
         
       </xpath>
     </field>

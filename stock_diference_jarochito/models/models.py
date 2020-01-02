@@ -23,7 +23,6 @@ class StockMoveRoute(models.Model):
 		compute="compute_diference"
 	)
 	stock_picking_id = fields.Many2one("stock.picking")
-	
 
 	@api.one
 	def compute_diference(self):
@@ -41,7 +40,7 @@ class StockPicking(models.Model):
 	interno = fields.Boolean(string="Orden de ruta")
 	subpedido_id = fields.Many2one('pos.order',string="pedido venta",readonly=True)
 	total_difencia = fields.Integer(string="Total diferencia")
-
+	liquida_ruta = fields.Boolean(string="Liquidar Ruta", default=False)
 	pos_confi = fields.Many2one('pos.config',string="Punto venta", related="ruta.pos_id")
 	pos_secion = fields.Many2one('pos.session',string="Sesion POS", domain="[('config_id','=',pos_confi)]")
 
@@ -90,13 +89,16 @@ class StockPicking(models.Model):
 						x.sale_qty += line.qty
 				else:
 					x.sale_qty = 0	
+		if self.total_difencia > 0:
+			self.liquida_ruta = True
 	
 	# @api.multi
-	# def button_validate(self):
-	# 	record = super(StockPicking, self).button_validate()
-	# 	#if self.state == 'done':
-	# 	self.change_route_moves()
-	# 	return record
+	# def write(self, values):
+	# 	record = super(StockPicking, self).write(values)
+	# 	if self.interno == True and self.liquida_ruta == True and not self.subpedido_id:
+	# 		raise ValidationError('Alerta! \n Es necesario liquidar la ruta.')
+	# 	else:
+	# 		return record
 
 	@api.onchange('route_moves')
 	def _function_route_moves(self):
@@ -206,7 +208,8 @@ class StockPicking(models.Model):
 					}	
 					self.env['account.bank.statement.line'].create(vars)
 			else:
-				raise ValidationError('Este empleado no tiene usuario, asignale un usuario')					
+				raise ValidationError('Este empleado no tiene usuario, asignale un usuario')
+			self.liquida_ruta = False
 
 
 
