@@ -147,7 +147,7 @@ class StockPicking(models.Model):
 								if self.chofer.user_id.partner_id.property_product_pricelist:
 									pricelist = self.chofer.user_id.partner_id.property_product_pricelist
 									producttmpl = self.env['product.template'].search([('id','=',line.product_id.product_tmpl_id.id)])
-									productpricelist = pricelist.item_ids.search([('product_tmpl_id','=',producttmpl.id)], limit=1)
+									productpricelist = pricelist.item_ids.search([('product_tmpl_id','=',producttmpl.id),('pricelist_id','=',pricelist.id)], limit=1)
 									if productpricelist:
 										neto = float(line.diference_qty) * float(productpricelist.fixed_price)
 										price_unit = productpricelist.fixed_price
