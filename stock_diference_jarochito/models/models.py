@@ -189,7 +189,7 @@ class StockPicking(models.Model):
 								# #price = price - ieps_amount
 								# mytaxes = self.env['account.tax'].search([('id','in',lista)])
 								# taxes = taxs.compute_all(price, self.company_id.currency_id, line.diference_qty, product=line.product_id, partner=self.chofer.user_id.partner_id)
-								# impuestos += taxes['total_included'] - taxes['total_excluded']
+								impuestos += price_total - price_subtotal
 								self.env['pos.order.line'].create({
 									'product_id': line.product_id.id,
 									'qty':line.diference_qty,
