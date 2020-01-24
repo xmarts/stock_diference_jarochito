@@ -126,7 +126,7 @@ class StockPicking(models.Model):
 				so=self.env['pos.order'].create({'name': self.env['ir.sequence'].next_by_code('pos.order') or _('New'),
 					'session_id':self.pos_secion.id,
 					'amount_tax':0,
-					'state':'paid',
+					'state':'draft',
 					'amount_total':total,
 					'amount_paid':total,
 					'amount_return':0,
@@ -159,7 +159,10 @@ class StockPicking(models.Model):
 									price_unit = line.product_id.lst_price
 								total += neto
 								price = neto
-								taxs = line.product_id.taxes_id.filtered(lambda r: not self.company_id or r.company_id == self.company_id)
+								currency = None
+								taxes = line.product_id.taxes_id.compute_all(price, currency, 1, product=line.product_id, partner=self.chofer.user_id.partner_id)
+								price_subtotal = price_subtotal_signed = taxes['total_excluded'] if taxes else 1 * price
+								price_total = taxes['total_included'] if taxes else price_subtotal
 								# lista = []
 								# ieps_amount = 0
 								# for x in taxs:
@@ -178,17 +181,27 @@ class StockPicking(models.Model):
 								# 		ieps_amount += x.amount
 								# #price = price - ieps_amount
 								# mytaxes = self.env['account.tax'].search([('id','in',lista)])
-								taxes = taxs.compute_all(price, self.company_id.currency_id, line.diference_qty, product=line.product_id, partner=self.chofer.user_id.partner_id)
-								impuestos += taxes['total_included'] - taxes['total_excluded']
+								# taxes = taxs.compute_all(price, self.company_id.currency_id, line.diference_qty, product=line.product_id, partner=self.chofer.user_id.partner_id)
+								# impuestos += taxes['total_included'] - taxes['total_excluded']
 								self.env['pos.order.line'].create({
 									'product_id': line.product_id.id,
 									'qty':line.diference_qty,
 									'price_unit':price_unit,
 									'tax_ids':[(6,0,line.product_id.taxes_id.ids)], 
-									'price_subtotal': taxes['total_excluded'],
-									'price_subtotal_incl':taxes['total_included'], 
+									'price_subtotal': price_subtotal,
+									'price_subtotal_incl':price_total,#taxes['total_included'], 
 									'order_id': so.id
 									})	
+								vars={
+									'product_id': line.product_id.id,
+									'qty':line.diference_qty,
+									'price_unit':price_unit,
+									'tax_ids':[(6,0,line.product_id.taxes_id.ids)], 
+									'price_subtotal': price_subtotal,
+									'price_subtotal_incl':price_total,#taxes['total_included'], 
+									'order_id': so.id
+									}
+								print(price_subtotal,price_total,vars)
 					self.subpedido_id.amount_total = total	
 					self.subpedido_id.amount_paid = total	
 					self.subpedido_id.amount_tax = impuestos	
@@ -209,7 +222,7 @@ class StockPicking(models.Model):
 					self.env['account.bank.statement.line'].create(vars)
 			else:
 				raise ValidationError('Este empleado no tiene usuario, asignale un usuario')
-			self.liquida_ruta = False
+			# self.liquida_ruta = False
 
 
 
