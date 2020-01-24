@@ -167,28 +167,21 @@ class StockPicking(models.Model):
 								total += neto
 								price = neto
 								currency = None
-								taxes = line.product_id.taxes_id.compute_all(price, currency, 1, product=line.product_id, partner=self.chofer.user_id.partner_id)
+								lista = []
+								ieps_amount = 0
+								for x in line.product_id.taxes_id:
+									ieps = False
+									for z in x.tag_ids:
+										if z.name == 'IEPS':
+											ieps = True
+									if ieps == False:
+										lista.append(x.id)
+								mytaxes = self.env['account.tax'].search([('id','in',lista)])
+								taxes = mytaxes.compute_all(price, currency, 1, product=line.product_id, partner=self.chofer.user_id.partner_id)
 								price_subtotal = price_subtotal_signed = taxes['total_excluded'] if taxes else 1 * price
 								price_total = taxes['total_included'] if taxes else price_subtotal
-								# lista = []
-								# ieps_amount = 0
-								# for x in taxs:
-								# 	ieps = False
-								# 	for z in x.tag_ids:
-								# 		if z.name == 'IEPS':
-								# 			ieps = True
-								# 	if ieps == False:
-								# 		lista.append(x.id)
-								# for x in line.product_id.taxes_id:
-								# 	ieps = False
-								# 	for z in x.tag_ids:
-								# 		if z.name == 'IEPS':
-								# 			ieps = True
-								# 	if ieps == True:
-								# 		ieps_amount += x.amount
-								# #price = price - ieps_amount
-								# mytaxes = self.env['account.tax'].search([('id','in',lista)])
-								# taxes = taxs.compute_all(price, self.company_id.currency_id, line.diference_qty, product=line.product_id, partner=self.chofer.user_id.partner_id)
+								
+								
 								impuestos += price_total - price_subtotal
 								self.env['pos.order.line'].create({
 									'product_id': line.product_id.id,
