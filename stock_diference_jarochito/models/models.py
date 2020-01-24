@@ -28,6 +28,13 @@ class StockMoveRoute(models.Model):
 	def compute_diference(self):
 		self.diference_qty = self.charge_qty - self.return_qty - self.sale_qty
 
+class PosOrder(models.Model):
+	_inherit = 'pos.order'
+
+	@api.multi
+	def force_cancel(self):
+		self.state = 'draft'
+
 
 class StockPicking(models.Model):
 	"""Agrega campos al stock.picking"""
