@@ -86,6 +86,7 @@ class StockPicking(models.Model):
 
 	@api.multi
 	def product_pos(self):
+		self._function_route_moves()
 		if self.interno == True:
 			searc_pedido = self.env['pos.order'].search([('session_id','=',self.pos_secion.id),])
 			for x in self.route_moves:
@@ -96,9 +97,15 @@ class StockPicking(models.Model):
 						x.sale_qty += line.qty
 				else:
 					x.sale_qty = 0	
+		dif = 0
+		resta = 0
+		for x in self.route_moves:
+			dif += x.charge_qty - x. return_qty - x.sale_qty
+		print("DIFERENCIA: ",self.total_difencia,dif)
 		if self.total_difencia > 0:
 			self.liquida_ruta = True
-	
+		else:
+			self.liquida_ruta = False
 	# @api.multi
 	# def write(self, values):
 	# 	record = super(StockPicking, self).write(values)
@@ -112,14 +119,7 @@ class StockPicking(models.Model):
 		dif = 0
 		resta = 0
 		for x in self.route_moves:
-			if x.charge_qty and x.return_qty:
-				resta = x.charge_qty - x. return_qty
-				if x.sale_qty:
-					x.diference_qty = resta - x.sale_qty
-				else:
-					x.diference_qty = 0
-			if x.diference_qty:
-				dif += x.diference_qty
+			dif += x.charge_qty - x. return_qty - x.sale_qty
 		self.total_difencia = dif
 	
 
