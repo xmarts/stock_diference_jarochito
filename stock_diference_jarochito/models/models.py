@@ -133,7 +133,7 @@ class StockPicking(models.Model):
 				so=self.env['pos.order'].create({'name': self.env['ir.sequence'].next_by_code('pos.order') or _('New'),
 					'session_id':self.pos_secion.id,
 					'amount_tax':0,
-					'state':'draft',
+					'state':'paid',
 					'amount_total':total,
 					'amount_paid':total,
 					'amount_return':0,
