@@ -130,6 +130,26 @@ class StockPicking(models.Model):
 				total = r.diference_qty * r.product_id.lst_price
 				
 			if self.chofer.user_id:
+
+
+				stock = {
+					'name': 'MOVLIQ-'+str(self.name),
+					'location_id' : self.location_dest_id.id,
+					'move_type' : 'direct',
+					'state' : 'done',
+					'priority' : '1',
+					'scheduled_date': datetime.now(),
+					'date': datetime.now(),
+					# 'user_id' : self.env.user_id.id,
+					'date_done': datetime.now(),
+					'location_dest_id' : self.pos_confi.picking_type_id.default_location_dest_id.id,
+					'picking_type_id' : self.pos_confi.picking_type_id.id, #automatizar
+					'is_locked' : 'true',
+					'immediate_trasfer' : 'false'
+				}
+
+				stockpicking = self.env['stock.picking'].create(stock)
+
 				so=self.env['pos.order'].create({'name': self.env['ir.sequence'].next_by_code('pos.order') or _('New'),
 					'session_id':self.pos_secion.id,
 					'amount_tax':0,
@@ -137,7 +157,8 @@ class StockPicking(models.Model):
 					'amount_total':total,
 					'amount_paid':total,
 					'amount_return':0,
-					'partner_id': self.chofer.user_id.partner_id.id
+					'partner_id': self.chofer.user_id.partner_id.id,
+					'picking_id': stockpicking.id
 
 					})
 				self.subpedido_id = so.id
@@ -192,16 +213,34 @@ class StockPicking(models.Model):
 									'price_subtotal_incl':price_total,#taxes['total_included'], 
 									'order_id': so.id
 									})	
-								vars={
-									'product_id': line.product_id.id,
-									'qty':line.diference_qty,
-									'price_unit':price_unit,
-									'tax_ids':[(6,0,line.product_id.taxes_id.ids)], 
-									'price_subtotal': price_subtotal,
-									'price_subtotal_incl':price_total,#taxes['total_included'], 
-									'order_id': so.id
-									}
-								print(price_subtotal,price_total,vars)
+								stockline= {
+									'name' : so.name,
+									'sequence' : '10',
+									'priority' : '1',
+									'date': datetime.now(),
+									'date_expected': datetime.now(),
+									'product_id' : line.product_id.id,
+									#'product_qty' : pedido['cantidad'],
+									'product_uom_qty' : float(line.diference_qty),
+									'reserved_availability' : float(line.diference_qty),
+									'quantity_done' : float(line.diference_qty),
+									'product_uom' : line.product_id.uom_id.id,
+									'location_id': self.location_dest_id.id,
+									'location_dest_id': self.pos_confi.picking_type_id.default_location_dest_id.id,
+									'picking_type_id' : self.pos_confi.picking_type_id.id, #automatizar
+									'picking_id' : stockpicking.id,
+									'state' : 'draft',
+									'price_unit' : str(price_unit * -1),
+									'value': str(price_unit * -1),
+									'procure_method' : 'make_to_stock',
+									'scrapped' : 'false',
+									'propagate' : 'true',
+									'aditional' : 'false',
+									'to_refud' : 'false',
+									'remaining_qty': str(float(line.diference_qty)*-1),
+									'remaining_value': str(price_subtotal * -1),
+								}
+								stockpickingmove = self.env['stock.move'].create(stockline)
 					self.subpedido_id.amount_total = total	
 					self.subpedido_id.amount_paid = total	
 					self.subpedido_id.amount_tax = impuestos	
@@ -220,6 +259,13 @@ class StockPicking(models.Model):
 						'partner_id' : self.chofer.user_id.partner_id.id,
 					}	
 					self.env['account.bank.statement.line'].create(vars)
+				try:
+					stockpicking.action_confirm()
+					stockpicking.action_assign()
+					x = self.env['stock.immediate.transfer'].create({'pick_ids': [(4, stockpicking.id)]})
+					x.process()
+				except:
+					print("NO PUDO CONCLUIRSE SALIDA DE INVENTARIO")
 			else:
 				raise ValidationError('Este empleado no tiene usuario, asignale un usuario')
 			# self.liquida_ruta = False
