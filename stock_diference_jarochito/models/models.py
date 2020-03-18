@@ -129,7 +129,7 @@ class StockPicking(models.Model):
 			for r in self.route_moves:				
 				total = r.diference_qty * r.product_id.lst_price
 				
-			if self.chofer.user_id:
+			if self.chofer.address_home_id:
 
 
 				stock = {
@@ -157,7 +157,7 @@ class StockPicking(models.Model):
 					'amount_total':total,
 					'amount_paid':total,
 					'amount_return':0,
-					'partner_id': self.chofer.user_id.partner_id.id,
+					'partner_id': self.chofer.address_home_id.id,
 					'picking_id': stockpicking.id
 
 					})
@@ -172,8 +172,8 @@ class StockPicking(models.Model):
 								con += 1
 								neto = 0
 								price_unit = 0
-								if self.chofer.user_id.partner_id.property_product_pricelist:
-									pricelist = self.chofer.user_id.partner_id.property_product_pricelist
+								if self.chofer.address_home_id.property_product_pricelist:
+									pricelist = self.chofer.address_home_id.property_product_pricelist
 									producttmpl = self.env['product.template'].search([('id','=',line.product_id.product_tmpl_id.id)])
 									productpricelist = pricelist.item_ids.search([('product_tmpl_id','=',producttmpl.id),('pricelist_id','=',pricelist.id)], limit=1)
 									if productpricelist:
@@ -198,7 +198,7 @@ class StockPicking(models.Model):
 									if ieps == False:
 										lista.append(x.id)
 								mytaxes = self.env['account.tax'].search([('id','in',lista)])
-								taxes = mytaxes.compute_all(price, currency, 1, product=line.product_id, partner=self.chofer.user_id.partner_id)
+								taxes = mytaxes.compute_all(price, currency, 1, product=line.product_id, partner=self.chofer.address_home_id)
 								price_subtotal = price_subtotal_signed = taxes['total_excluded'] if taxes else 1 * price
 								price_total = taxes['total_included'] if taxes else price_subtotal
 								
@@ -249,14 +249,14 @@ class StockPicking(models.Model):
 						'name' : so.name,
 						'date' : date.today(),
 						'amount' : total,
-						'account_id' : self.chofer.user_id.partner_id.property_account_receivable_id.id,
+						'account_id' : self.chofer.address_home_id.property_account_receivable_id.id,
 						'statement_id' : statement.id,
 						'journal_id' : self.pos_confi.journal_id.id,
 						'ref' : self.pos_secion.name,
 						'sequence' : '1',
 						'company_id' : self.pos_confi.company_id.id,
 						'pos_statement_id' : self.subpedido_id.id,
-						'partner_id' : self.chofer.user_id.partner_id.id,
+						'partner_id' : self.chofer.address_home_id.id,
 					}	
 					self.env['account.bank.statement.line'].create(vars)
 				try:
@@ -267,7 +267,7 @@ class StockPicking(models.Model):
 				except:
 					print("NO PUDO CONCLUIRSE SALIDA DE INVENTARIO")
 			else:
-				raise ValidationError('Este empleado no tiene usuario, asignale un usuario')
+				raise ValidationError('Este empleado no tiene direccion privada, asignale una direccion')
 			# self.liquida_ruta = False
 
 
