@@ -23,6 +23,7 @@ class StockMoveRoute(models.Model):
 		compute="compute_diference"
 	)
 	stock_picking_id = fields.Many2one("stock.picking")
+	price = fields.Float(string='Precio Empleado')
 
 	@api.one
 	def compute_diference(self):
@@ -75,10 +76,22 @@ class StockPicking(models.Model):
 					z.charge_qty += x.quantity
 					e = True
 			if e == False:
+				price_unit = 0
+				if self.chofer.address_home_id.property_product_pricelist:
+					pricelist = self.chofer.address_home_id.property_product_pricelist
+					producttmpl = self.env['product.template'].search([('id','=',x.product_id.product_tmpl_id.id)])
+					productpricelist = pricelist.item_ids.search([('product_tmpl_id','=',producttmpl.id),('pricelist_id','=',pricelist.id)], limit=1)
+					if productpricelist:
+						price_unit = productpricelist.fixed_price
+					else:
+						price_unit = x.product_id.lst_price
+				else:
+					price_unit = x.product_id.lst_price
 				self.route_moves.create({
 					'product_id': x.product_id.id,
 					'charge_qty': x.quantity,
 					'stock_picking_id': self.id,
+					'price':price_unit
 				})
 		self.pos_secion.stock_picking_id = self.id
 
@@ -130,10 +143,11 @@ class StockPicking(models.Model):
 				total = r.diference_qty * r.product_id.lst_price
 				
 			if self.chofer.address_home_id:
-
-
+				defaults = self.env['stock.picking'].default_get(['name', 'picking_type_id'])
+				n = self.pos_confi.picking_type_id.sequence_id.next_by_id()
+				print("NAME: ",n)
 				stock = {
-					'name': 'LIQ-'+str(self.name),
+					'name': n,
 					'location_id' : self.location_dest_id.id,
 					'move_type' : 'direct',
 					'state' : 'done',
@@ -170,23 +184,9 @@ class StockPicking(models.Model):
 						for line in lx.route_moves:
 							if line.diference_qty >0 :
 								con += 1
-								neto = 0
-								price_unit = 0
-								if self.chofer.address_home_id.property_product_pricelist:
-									pricelist = self.chofer.address_home_id.property_product_pricelist
-									producttmpl = self.env['product.template'].search([('id','=',line.product_id.product_tmpl_id.id)])
-									productpricelist = pricelist.item_ids.search([('product_tmpl_id','=',producttmpl.id),('pricelist_id','=',pricelist.id)], limit=1)
-									if productpricelist:
-										neto = float(line.diference_qty) * float(productpricelist.fixed_price)
-										price_unit = productpricelist.fixed_price
-									else:
-										neto = line.diference_qty * line.product_id.lst_price
-										price_unit = line.product_id.lst_price
-								else:
-									neto = line.diference_qty * line.product_id.lst_price
-									price_unit = line.product_id.lst_price
-								total += neto
-								price = neto
+								price_unit = line.price
+								total += line.price * line.diference_qty
+								price = line.price * line.diference_qty
 								currency = None
 								lista = []
 								ieps_amount = 0
@@ -199,7 +199,7 @@ class StockPicking(models.Model):
 										lista.append(x.id)
 								mytaxes = self.env['account.tax'].search([('id','in',lista)])
 								taxes = mytaxes.compute_all(price, currency, 1, product=line.product_id, partner=self.chofer.address_home_id)
-								price_subtotal = price_subtotal_signed = taxes['total_excluded'] if taxes else 1 * price
+								price_subtotal = price_subtotal_signed = taxes['total_excluded'] if taxes else price
 								price_total = taxes['total_included'] if taxes else price_subtotal
 								
 								

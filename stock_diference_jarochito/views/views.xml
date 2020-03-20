@@ -25,6 +25,7 @@
               <field name="return_qty" />
               <field name="sale_qty" />
               <field name="diference_qty" />
+              <field name="price" />
               <field name="stock_picking_id" invisible="1" />
             </tree>
           </field>
