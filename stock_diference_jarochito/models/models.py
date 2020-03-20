@@ -133,7 +133,7 @@ class StockPicking(models.Model):
 
 
 				stock = {
-					'name': 'LIQ-'+str(self.name)+,
+					'name': 'LIQ-'+str(self.name),
 					'location_id' : self.location_dest_id.id,
 					'move_type' : 'direct',
 					'state' : 'done',
