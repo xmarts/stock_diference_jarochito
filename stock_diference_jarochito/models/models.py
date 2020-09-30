@@ -24,10 +24,7 @@ class StockMoveRoute(models.Model):
 	)
 	stock_picking_id = fields.Many2one("stock.picking")
 	price = fields.Float(string='Precio Empleado')
-
-	price_diference = fields.Float(
-	    string='Diferencia $',
-	)
+	price_diference = fields.Float(string='Diferencia $')
 
 	@api.one
 	def compute_diference(self):
