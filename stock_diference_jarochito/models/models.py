@@ -92,7 +92,7 @@ class StockPicking(models.Model):
 					'product_id': x.product_id.id,
 					'charge_qty': x.quantity,
 					'stock_picking_id': self.id,
-					'price':price_unit
+					'price':price_unit,
 					'price_diference': x.quantity * price_unit if x.quantity > 0 and price_unit > 0 else 0
 				})
 		self.pos_secion.stock_picking_id = self.id
