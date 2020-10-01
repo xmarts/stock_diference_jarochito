@@ -92,8 +92,8 @@ class StockPicking(models.Model):
 					'product_id': x.product_id.id,
 					'charge_qty': x.quantity,
 					'stock_picking_id': self.id,
-					'price':price_unit,
-					'price_diference': x.quantity * price_unit if x.quantity > 0 and price_unit > 0 else 0
+					'price':price_unit
+					
 				})
 		self.pos_secion.stock_picking_id = self.id
 
@@ -116,8 +116,8 @@ class StockPicking(models.Model):
 		resta = 0
 		for x in self.route_moves:
 			dif += x.charge_qty - x. return_qty - x.sale_qty
-			if x.quantity > 0 and x.price_unit:
-				val = x.quantity * x.price_unit
+			if x.diference_qty > 0 and x.price:
+				val = x.diference_qty * x.price
 				x.write({'price_diference': val})
 		print("DIFERENCIA: ",self.total_difencia,dif)
 		if self.total_difencia > 0:
