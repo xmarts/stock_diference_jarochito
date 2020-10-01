@@ -116,8 +116,12 @@ class StockPicking(models.Model):
 		resta = 0
 		for x in self.route_moves:
 			dif += x.charge_qty - x. return_qty - x.sale_qty
+			if x.quantity > 0 and x.price_unit:
+				val = x.quantity * x.price_unit
+				x.write({'price_diference': val})
 		print("DIFERENCIA: ",self.total_difencia,dif)
 		if self.total_difencia > 0:
+
 			self.liquida_ruta = True
 		else:
 			self.liquida_ruta = False
