@@ -44,7 +44,10 @@
                <div class="last-page">
                  <t t-foreach="docs" t-as="o">
                          <span  style="float: left; padding-left: 50px;"> _____________________</span> <span style="padding-right: 50px; float: right;"> _____________________</span><br/>
-                         <span  style="float: left; padding-left: 80px;" t-esc="o.config_id.name"/> <span style="padding-right: 80px; float: right;" t-esc="user.name"/><br/>
+                    <ul class="list-inline mb4">      
+                    <li  class="list-inline-item"><span  style="float: left; padding-left: 80px;" t-esc="o.config_id.name"/> </li>
+                    <li  class="list-inline-item pull-right"><span style="padding-right: 80px; float: right;" t-esc="user.name"/></li>
+                    </ul>
                       </t>
                     </div>
             <div class="text-center" style="border-top: 1px solid black;">
@@ -76,7 +79,7 @@
 
                         <h2>
                           
-                                <span>Corte de caja pesosxxx</span>
+                                <span>Corte de caja pesos</span>
                         </h2>
 
                         <div class="row mt32 mb32" id="informations">
