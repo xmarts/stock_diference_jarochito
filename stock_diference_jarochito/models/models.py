@@ -77,24 +77,25 @@ class StockPicking(models.Model):
 					z.charge_qty += x.quantity
 					e = True
 			if e == False:
-				price_unit = 0
-				if self.chofer.address_home_id.property_product_pricelist:
-					pricelist = self.chofer.address_home_id.property_product_pricelist
-					producttmpl = self.env['product.template'].search([('id','=',x.product_id.product_tmpl_id.id)])
-					productpricelist = pricelist.item_ids.search([('product_tmpl_id','=',producttmpl.id),('pricelist_id','=',pricelist.id)], limit=1)
-					if productpricelist:
-						price_unit = productpricelist.fixed_price
+				if x.quantity > 0:
+					price_unit = 0
+					if self.chofer.address_home_id.property_product_pricelist:
+						pricelist = self.chofer.address_home_id.property_product_pricelist
+						producttmpl = self.env['product.template'].search([('id','=',x.product_id.product_tmpl_id.id)])
+						productpricelist = pricelist.item_ids.search([('product_tmpl_id','=',producttmpl.id),('pricelist_id','=',pricelist.id)], limit=1)
+						if productpricelist:
+							price_unit = productpricelist.fixed_price
+						else:
+							price_unit = x.product_id.lst_price
 					else:
 						price_unit = x.product_id.lst_price
-				else:
-					price_unit = x.product_id.lst_price
-				self.route_moves.create({
-					'product_id': x.product_id.id,
-					'charge_qty': x.quantity,
-					'stock_picking_id': self.id,
-					'price':price_unit
-					
-				})
+					self.route_moves.create({
+						'product_id': x.product_id.id,
+						'charge_qty': x.quantity,
+						'stock_picking_id': self.id,
+						'price':price_unit
+						
+					})
 		self.pos_secion.stock_picking_id = self.id
 
 
