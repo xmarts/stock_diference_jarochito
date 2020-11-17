@@ -56,7 +56,11 @@ class StockPicking(models.Model):
 	@api.onchange('pos_confi')
 	def onchange_pos_confi(self):
 		last_session = self.env['pos.session'].search([('config_id','=',self.pos_confi.id)],limit=1)
-		self.pos_secion = last_session.id
+		if last_session.state == 'opened':
+			print(last_session)
+			self.pos_secion = last_session.id
+		else:
+			raise ValidationError(_(" Error, necesitas tener una sesión abierta en punto de venta"))
 
 	@api.multi
 	def change_route_moves(self):
