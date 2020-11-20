@@ -3,6 +3,7 @@
 from odoo import models, fields, api, _
 from datetime import datetime, date, timedelta
 from odoo.exceptions import AccessError, UserError, RedirectWarning, ValidationError, Warning
+from odoo.addons import decimal_precision as dp
 
 class StockMoveRoute(models.Model):
 	"""Agrega tabla para diferencias de entrega al stock.picking"""
@@ -52,6 +53,20 @@ class StockPicking(models.Model):
 	liquida_ruta = fields.Boolean(string="Liquidar Ruta", default=False)
 	pos_confi = fields.Many2one('pos.config',string="Punto venta", related="ruta.pos_id")
 	pos_secion = fields.Many2one('pos.session',string="Sesion POS", domain="[('config_id','=',pos_confi)]")
+	ruta_liquidada = fields.Boolean(string="Liquidada", default=False)
+	# CAMPOS DE DELIVERY
+
+	# carrier_price = fields.Float(string="Shipping Cost")
+	# delivery_type = fields.Selection(related='carrier_id.delivery_type', readonly=True)
+	# carrier_id = fields.Many2one("delivery.carrier", string="Carrier")
+	# volume = fields.Float(copy=False)
+	# weight = fields.Float(compute='_cal_weight', digits=dp.get_precision('Stock Weight'), store=True, compute_sudo=True)
+	# carrier_tracking_ref = fields.Char(string='Tracking Reference', copy=False)
+	# carrier_tracking_url = fields.Char(string='Tracking URL', compute='_compute_carrier_tracking_url')
+	# weight_uom_id = fields.Many2one('uom.uom', string='Unit of Measure', compute='_compute_weight_uom_id', help="Unit of measurement for Weight")
+	# package_ids = fields.Many2many('stock.quant.package', compute='_compute_packages', string='Packages')
+	# weight_bulk = fields.Float('Bulk Weight', compute='_compute_bulk_weight')
+	# shipping_weight = fields.Float("Weight for Shipping", compute='_compute_shipping_weight')
 
 	@api.onchange('pos_confi')
 	def onchange_pos_confi(self):
@@ -281,6 +296,7 @@ class StockPicking(models.Model):
 					print("NO PUDO CONCLUIRSE SALIDA DE INVENTARIO")
 			else:
 				raise ValidationError('Este empleado no tiene direccion privada, asignale una direccion')
+			self.ruta_liquidada = True
 			# self.liquida_ruta = False
 
 

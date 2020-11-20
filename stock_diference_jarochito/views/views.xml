@@ -45,12 +45,14 @@
 
 
       <xpath expr="//button[@name='button_scrap']" position="after">
-        <button name="create_venta_dos" string="Liquidar Ruta" type="object" class="oe_highlight" attrs="{'invisible':[('liquida_ruta','=',False)]}" />
+        <button name="create_venta_dos" string="Liquidar Ruta" type="object" class="oe_highlight" attrs="{'invisible':[('ruta_liquidada','=',True)]}" />
       </xpath> 
       <xpath expr="//field[@name='origin']" position="after">
 
         <field name="subpedido_id" attrs="{'invisible':['|',('total_difencia','=',0),'|',('interno','!=',True)]}" />
         <field name="liquida_ruta" attrs="{'invisible':['|',('total_difencia','=',0),'|',('interno','!=',True)]}" readonly="1"/>
+        <field name="ruta_liquidada" invisible="1"/>
+
         
       </xpath>
     </field>
