@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, api, _
@@ -326,6 +327,22 @@ class returns_tras(models.TransientModel):
 class PosSession(models.Model):
 	_inherit = 'pos.session'
 	stock_picking_id = fields.Many2one(comodel_name="stock.picking", string="Inventario entregado")
+
+
+	@api.multi
+	def action_pos_session_validate(self):
+		for rec in self:
+			pos_order = self.env['pos.order'].search([('session_id', '=', rec.id)])
+			for order in pos_order:
+				if order.amount_total == 0:
+					print('Lineas en 0')
+					if order.lines:
+						pass
+					else:
+						order.force_cancel()
+						order.unlink()
+		return super(PosSession, self).action_pos_session_validate()
+
 
 
 
