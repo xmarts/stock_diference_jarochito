@@ -204,6 +204,7 @@ class StockPicking(models.Model):
 					'picking_id': stockpicking.id
 
 					})
+				so.update({'branch_id': self.pos_confi.stock_location_id.branch_id.id})
 				self.subpedido_id = so.id
 				for lx in self:
 					total = 0
