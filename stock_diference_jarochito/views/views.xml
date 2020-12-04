@@ -37,7 +37,8 @@
         <field name="ruta" attrs="{'invisible':[('interno','!=',True)],'required':[('interno','=',True)]}" /> 
         <field name="pos_confi" attrs="{'invisible':[('interno','!=',True)]}" />  
         <field name="chofer" attrs="{'invisible':[('interno','!=',True)]}" />
-        <field name="total_difencia" invisible="1"/>          
+        <field name="total_difencia" invisible="0"/>
+        <field name="diference_total" invisible="0"/>          
         <field name="pos_secion" attrs="{'invisible':[('interno','!=',True)],'required':[('interno','=',True)]}" />
         <button name="change_route_moves" string="Calcular Carga" type="object" attrs="{'invisible':[('interno','!=',True)]}" class="oe_edit_only"/> 
         <button name="product_pos" string="Calcular Diferencia" type="object" attrs="{'invisible':[('interno','!=',True)]}" class="oe_edit_only"/> 

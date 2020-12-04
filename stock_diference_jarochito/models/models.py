@@ -50,7 +50,8 @@ class StockPicking(models.Model):
 	chofer = fields.Many2one('hr.employee',string="Chofer", related="ruta.user_id")
 	interno = fields.Boolean(string="Orden de ruta")
 	subpedido_id = fields.Many2one('pos.order',string="pedido venta",readonly=True)
-	total_difencia = fields.Integer(string="Total diferencia")
+	diference_total = fields.Float(string="Total diferencia", digits=(12,4))
+	total_difencia = fields.Integer(string="Total diferencia", digits=(12,4))
 	liquida_ruta = fields.Boolean(string="Liquidar Ruta", default=False)
 	pos_confi = fields.Many2one('pos.config',string="Punto venta", related="ruta.pos_id")
 	pos_secion = fields.Many2one('pos.session',string="Sesion POS", domain="[('config_id','=',pos_confi)]")
@@ -124,26 +125,31 @@ class StockPicking(models.Model):
 
 	@api.multi
 	def product_pos(self):
-		self._function_route_moves()
+		# self._function_route_moves()
+		dif = 0.0
+		# resta = 0.0
+		for x in self.route_moves:
+			dif += x.charge_qty - x. return_qty - x.sale_qty
+		self.diference_total = dif
 		if self.interno == True:
 			searc_pedido = self.env['pos.order'].search([('session_id','=',self.pos_secion.id),])
 			for x in self.route_moves:
 				searc_lines = self.env['pos.order.line'].search([('order_id','in',searc_pedido.ids),('product_id','=',x.product_id.id)])
 				if  searc_lines:
-					x.sale_qty = 0	
+					x.sale_qty = 0.0	
 					for line in searc_lines:
 						x.sale_qty += line.qty
 				else:
-					x.sale_qty = 0	
-		dif = 0
-		resta = 0
+					x.sale_qty = 0.0	
+		dif = 0.0
+		# resta = 0
 		for x in self.route_moves:
 			dif += x.charge_qty - x. return_qty - x.sale_qty
-			if x.diference_qty > 0 and x.price:
+			if x.diference_qty > 0.0 and x.price:
 				val = x.diference_qty * x.price
 				x.write({'price_diference': val})
-		print("DIFERENCIA: ",self.total_difencia,dif)
-		if self.total_difencia > 0:
+		print("DIFERENCIA: ",self.diference_total,dif)
+		if self.diference_total > 0.0:
 
 			self.liquida_ruta = True
 		else:
@@ -158,16 +164,21 @@ class StockPicking(models.Model):
 
 	@api.onchange('route_moves')
 	def _function_route_moves(self):
-		dif = 0
-		resta = 0
+		dif = 0.0
+		# resta = 0.0
 		for x in self.route_moves:
 			dif += x.charge_qty - x. return_qty - x.sale_qty
-		self.total_difencia = dif
-	
+		self.diference_total = dif
+		print(dif, 'qqqqqqqqqqqqqqqqqqqqqqqqq')
+		# return dif
 
 	@api.multi
 	def create_venta_dos(self):
-		if self.total_difencia >0:
+		print('diferencia', self.diference_total)
+		# diferencia = self._function_route_moves()
+		# print(diferencia)
+		if self.diference_total > 0.0:
+			print('Enrtraaaaaaaaaa', self.diference_total)
 			for r in self.route_moves:				
 				total = r.diference_qty * r.product_id.lst_price
 				
@@ -212,7 +223,7 @@ class StockPicking(models.Model):
 					if lx.route_moves:
 						con = 0 
 						for line in lx.route_moves:
-							if line.diference_qty >0 :
+							if line.diference_qty > 0 :
 								con += 1
 								price_unit = line.price
 								total += line.price * line.diference_qty
@@ -311,7 +322,7 @@ class returns_tras(models.TransientModel):
 		obj_stock = self.env['stock.picking'].search([('id', '=', self.picking_id.id)], limit=1)
 		if obj_stock:
 			if obj_stock.interno == True:
-				if obj_stock.total_difencia >0:
+				if obj_stock.diference_total > 0.0:
 					sale = self.env['sale.order'].search([('name','=',obj_stock.subpedido_id.name)])
 					if sale:
 						if sale.state == 'sale':
