@@ -161,6 +161,13 @@ class StockPicking(models.Model):
 	# 		raise ValidationError('Alerta! \n Es necesario liquidar la ruta.')
 	# 	else:
 	# 		return record
+	@api.multi
+	def button_validate(self):
+		res = super(StockPicking, self).button_validate()
+		if self.interno == True and self.pos_confi != False:
+			self.change_route_moves()
+		# raise ValidationError("ooooooooooooooooo")
+		return res
 
 	@api.onchange('route_moves')
 	def _function_route_moves(self):
