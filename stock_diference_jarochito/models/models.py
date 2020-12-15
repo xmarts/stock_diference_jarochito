@@ -375,11 +375,11 @@ class PosSession(models.Model):
 		return super(PosSession, self).action_pos_session_validate()
 
 
+class PosConfig(models.Model):
+	_inherit = 'pos.config'
 
 
-
-
-
+	validate_session = fields.Boolean(string="Validar Sesion Activa", default=False)
 
 
 
