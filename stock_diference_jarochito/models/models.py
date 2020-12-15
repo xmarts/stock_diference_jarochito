@@ -126,34 +126,42 @@ class StockPicking(models.Model):
 	@api.multi
 	def product_pos(self):
 		# self._function_route_moves()
-		dif = 0.0
-		# resta = 0.0
-		for x in self.route_moves:
-			dif += x.charge_qty - x. return_qty - x.sale_qty
-		self.diference_total = dif
-		if self.interno == True:
-			searc_pedido = self.env['pos.order'].search([('session_id','=',self.pos_secion.id),])
-			for x in self.route_moves:
-				searc_lines = self.env['pos.order.line'].search([('order_id','in',searc_pedido.ids),('product_id','=',x.product_id.id)])
-				if  searc_lines:
-					x.sale_qty = 0.0	
-					for line in searc_lines:
-						x.sale_qty += line.qty
-				else:
-					x.sale_qty = 0.0	
-		dif = 0.0
-		# resta = 0
-		for x in self.route_moves:
-			dif += x.charge_qty - x. return_qty - x.sale_qty
-			if x.diference_qty > 0.0 and x.price:
-				val = x.diference_qty * x.price
-				x.write({'price_diference': val})
-		print("DIFERENCIA: ",self.diference_total,dif)
-		if self.diference_total > 0.0:
+		if self.pos_confi.validate_session == False:
+			mobile_orders = self.env['mobile.order'].search([('id','!=', 0)])
+			for rec in mobile_orders:
+				if not rec.pos_order_id:
+					rec.action_create_pos_order()
 
-			self.liquida_ruta = True
+			dif = 0.0
+			# resta = 0.0
+			for x in self.route_moves:
+				dif += x.charge_qty - x. return_qty - x.sale_qty
+			self.diference_total = dif
+			if self.interno == True:
+				searc_pedido = self.env['pos.order'].search([('session_id','=',self.pos_secion.id),])
+				for x in self.route_moves:
+					searc_lines = self.env['pos.order.line'].search([('order_id','in',searc_pedido.ids),('product_id','=',x.product_id.id)])
+					if  searc_lines:
+						x.sale_qty = 0.0	
+						for line in searc_lines:
+							x.sale_qty += line.qty
+					else:
+						x.sale_qty = 0.0	
+			dif = 0.0
+			# resta = 0
+			for x in self.route_moves:
+				dif += x.charge_qty - x. return_qty - x.sale_qty
+				if x.diference_qty > 0.0 and x.price:
+					val = x.diference_qty * x.price
+					x.write({'price_diference': val})
+			print("DIFERENCIA: ",self.diference_total,dif)
+			if self.diference_total > 0.0:
+
+				self.liquida_ruta = True
+			else:
+				self.liquida_ruta = False
 		else:
-			self.liquida_ruta = False
+			raise UserError("La session de la applicacion aun sigue abierta, favor de cerrar la session para continuar con la operacion")
 	# @api.multi
 	# def write(self, values):
 	# 	record = super(StockPicking, self).write(values)
