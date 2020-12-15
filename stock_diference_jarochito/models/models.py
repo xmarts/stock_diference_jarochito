@@ -56,6 +56,7 @@ class StockPicking(models.Model):
 	pos_confi = fields.Many2one('pos.config',string="Punto venta", related="ruta.pos_id")
 	pos_secion = fields.Many2one('pos.session',string="Sesion POS", domain="[('config_id','=',pos_confi)]")
 	ruta_liquidada = fields.Boolean(string="Liquidada", default=False)
+	seccond_transfer = fields.Boolean(string="Llevara segunda trasnferencia", default=False)
 	# CAMPOS DE DELIVERY
 
 	# carrier_price = fields.Float(string="Shipping Cost")
@@ -132,30 +133,32 @@ class StockPicking(models.Model):
 				if not rec.pos_order_id:
 					rec.action_create_pos_order()
 
-			dif = 0.0
-			# resta = 0.0
-			for x in self.route_moves:
-				dif += x.charge_qty - x. return_qty - x.sale_qty
-			self.diference_total = dif
+
 			if self.interno == True:
 				searc_pedido = self.env['pos.order'].search([('session_id','=',self.pos_secion.id),])
+				dif = 0.0
 				for x in self.route_moves:
 					searc_lines = self.env['pos.order.line'].search([('order_id','in',searc_pedido.ids),('product_id','=',x.product_id.id)])
-					if  searc_lines:
-						x.sale_qty = 0.0	
+					# if  searc_lines:
+					x.sale_qty = 0.0
+					if self.seccond_transfer == True:
+						print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+						x.sale_qty = 0.0
+						x.update({'price_diference': 0.0})
+						x.update({'return_qty': x.charge_qty})
+						x.return_qty = x.charge_qty
+					else:
+						print('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb')
+						dif += x.charge_qty - x. return_qty - x.sale_qty
 						for line in searc_lines:
 							x.sale_qty += line.qty
-					else:
-						x.sale_qty = 0.0	
-			dif = 0.0
-			# resta = 0
-			for x in self.route_moves:
-				dif += x.charge_qty - x. return_qty - x.sale_qty
-				if x.diference_qty > 0.0 and x.price:
-					val = x.diference_qty * x.price
-					x.write({'price_diference': val})
-			print("DIFERENCIA: ",self.diference_total,dif)
-			if self.diference_total > 0.0:
+						if x.diference_qty > 0.0 and x.price:
+							val = x.diference_qty * x.price
+							x.write({'price_diference': val})
+							print("DIFERENCIA: ",self.diference_total)
+				self.diference_total = dif
+			# for x in self.route_moves:
+			# if self.diference_total > 0.0:
 
 				self.liquida_ruta = True
 			else:
@@ -181,10 +184,13 @@ class StockPicking(models.Model):
 	def _function_route_moves(self):
 		dif = 0.0
 		# resta = 0.0
-		for x in self.route_moves:
-			dif += x.charge_qty - x. return_qty - x.sale_qty
-		self.diference_total = dif
-		print(dif, 'qqqqqqqqqqqqqqqqqqqqqqqqq')
+		if self.seccond_transfer == False:
+			for x in self.route_moves:
+				dif += x.charge_qty - x. return_qty - x.sale_qty
+			self.diference_total = dif
+			print(dif, 'qqqqqqqqqqqqqqqqqqqqqqqqq')
+		else:
+			dif = 0.0
 		# return dif
 
 	@api.multi

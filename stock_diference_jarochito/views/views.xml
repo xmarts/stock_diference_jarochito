@@ -53,6 +53,7 @@
         <field name="subpedido_id" attrs="{'invisible':['|',('total_difencia','=',0),'|',('interno','!=',True)]}" />
         <field name="liquida_ruta" attrs="{'invisible':['|',('total_difencia','=',0),'|',('interno','!=',True)]}" readonly="1"/>
         <field name="ruta_liquidada" invisible="1"/>
+        <field name="seccond_transfer" invisible="0"/>
 
         
       </xpath>
