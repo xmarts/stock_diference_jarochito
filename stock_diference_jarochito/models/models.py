@@ -14,6 +14,9 @@ class StockMoveRoute(models.Model):
 	charge_qty = fields.Float(
 		string='Cantidad Cargada',
 	)
+
+	qty_anterior = fields.Float(string='Cantidad anterior', default=0)
+
 	return_qty = fields.Float(
 		string='Cantidad Retornada',
 	)
@@ -56,7 +59,8 @@ class StockPicking(models.Model):
 	pos_confi = fields.Many2one('pos.config',string="Punto venta", related="ruta.pos_id")
 	pos_secion = fields.Many2one('pos.session',string="Sesion POS", domain="[('config_id','=',pos_confi)]")
 	ruta_liquidada = fields.Boolean(string="Liquidada", default=False)
-	seccond_transfer = fields.Boolean(string="Llevara segunda trasnferencia", default=False)
+	seccond_transfer = fields.Boolean(string="Es una Liquidacion", default=False)
+	stock_pi = fields.Many2one('stock.picking', string='Carga anterior')
 	# CAMPOS DE DELIVERY
 
 	# carrier_price = fields.Float(string="Shipping Cost")
@@ -70,6 +74,41 @@ class StockPicking(models.Model):
 	# package_ids = fields.Many2many('stock.quant.package', compute='_compute_packages', string='Packages')
 	# weight_bulk = fields.Float('Bulk Weight', compute='_compute_bulk_weight')
 	# shipping_weight = fields.Float("Weight for Shipping", compute='_compute_shipping_weight')
+	def buscar_anterior(self):
+		# picking_id = self.env['stock.picking'].search([('id', '=', self.stock_pi)])
+		for rec in self.stock_pi.route_moves:
+			print('qqqqqqqqqqqqqqq',rec.product_id)
+			for moves in self.route_moves:
+				#print('aaaaaaaaaaaaaa', moves.product_id)
+				if rec.product_id in moves.product_id:
+					moves.qty_anterior = rec.charge_qty
+					print('ccccccccccccc', moves.product_id)
+		# print('aaaaaaaaaaaaaaaaaaaaaaaa')
+		# productos = []
+		# cantidad = []
+		# for picking in self.stock_pi.route_moves:
+		# 	productos.append(picking.product_id.id)
+		# 	cantidad.append(picking.charge_qty)
+		# print('PRODUCTOSSSSSSSSSSS Anteriores', productos)
+		# nuevo_pro = []
+		# for rec in self.route_moves:
+		# 	if rec.product_id.id in (productos):
+		# 		print('qqqqqqqqqqqqqqqqqq', )
+			#nuevo_pro.append(rec.product_id.id)
+			# print('Nueeeeeeeeeevo', nuevo_pro)
+
+			# if picking.pos_secion.id == picking.stock_pi.pos_secion.id:
+			# 	for moves in picking.route_moves:
+			# 		if picking.route_moves.product_id in (moves.product_id):
+			# 			picking.route_moves.qty_anterior = moves.charge_qty
+		# 	productos.append(moves.product_id)
+		# for rec in self:
+		# 	if rec.stock_pi.pos_secion.id == rec.pos_secion.id:
+		# 			if rec.product_id in productos:
+		# 				print(rec.charge_qty)
+		# 				moves.route_moves.qty_anterior = rec.charge_qty
+		# else:
+		# 	print('ta vacio')
 
 	@api.onchange('pos_confi')
 	def onchange_pos_confi(self):
@@ -93,6 +132,7 @@ class StockPicking(models.Model):
 		# 		'stock_picking_id': self.id,
 		# 	})
 		# 	print("PRODUCTO >>>>>>>>>>>>>>>>>> ",x.product_id.name)
+		self.buscar_anterior()
 		prods = self.env['stock.quant'].search([('location_id','=',self.location_dest_id.id)])
 		for x in prods:
 			e = False
@@ -120,6 +160,15 @@ class StockPicking(models.Model):
 						'price':price_unit
 						
 					})
+		if self.seccond_transfer == True:
+			searc_pedido = self.env['pos.order'].search([('session_id','=',self.pos_secion.id),])
+			for moves in self.route_moves:
+				searc_lines = self.env['pos.order.line'].search([('order_id','in',searc_pedido.ids),('product_id','=',moves.product_id.id)])
+				for line in searc_lines:
+					print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', moves.product_id.name)
+					moves.charge_qty += line.qty
+
+		# self.buscar_anterior()
 		self.pos_secion.stock_picking_id = self.id
 
 
@@ -141,22 +190,22 @@ class StockPicking(models.Model):
 					searc_lines = self.env['pos.order.line'].search([('order_id','in',searc_pedido.ids),('product_id','=',x.product_id.id)])
 					# if  searc_lines:
 					x.sale_qty = 0.0
-					if self.seccond_transfer == True:
+					if self.seccond_transfer == False:
 						print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
-						x.sale_qty = 0.0
 						x.update({'price_diference': 0.0})
 						x.update({'return_qty': x.charge_qty})
 						x.return_qty = x.charge_qty
 					else:
 						print('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb')
-						dif += x.charge_qty - x. return_qty - x.sale_qty
+						self.diference_total = 0
 						for line in searc_lines:
 							x.sale_qty += line.qty
+						dif += x.charge_qty - x. return_qty - x.sale_qty
 						if x.diference_qty > 0.0 and x.price:
 							val = x.diference_qty * x.price
 							x.write({'price_diference': val})
 							print("DIFERENCIA: ",self.diference_total)
-				self.diference_total = dif
+						self.diference_total = dif
 			# for x in self.route_moves:
 			# if self.diference_total > 0.0:
 
