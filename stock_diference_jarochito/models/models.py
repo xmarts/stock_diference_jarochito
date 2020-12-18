@@ -59,7 +59,8 @@ class StockPicking(models.Model):
 	pos_confi = fields.Many2one('pos.config',string="Punto venta", related="ruta.pos_id")
 	pos_secion = fields.Many2one('pos.session',string="Sesion POS", domain="[('config_id','=',pos_confi)]")
 	ruta_liquidada = fields.Boolean(string="Liquidada", default=False)
-	seccond_transfer = fields.Boolean(string="Es una Liquidacion", default=False)
+	seccond_transfer = fields.Boolean(string="Es una Recarga", default=False)
+	liqui = fields.Boolean(string="Es una Liquidacion", default=False)
 	stock_pi = fields.Many2one('stock.picking', string='Carga anterior')
 	# CAMPOS DE DELIVERY
 
@@ -167,6 +168,8 @@ class StockPicking(models.Model):
 				for line in searc_lines:
 					print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', moves.product_id.name)
 					moves.charge_qty += line.qty
+				moves.write({'diference_qty': 0.0})
+			self.product_pos()
 
 		# self.buscar_anterior()
 		self.pos_secion.stock_picking_id = self.id
@@ -190,22 +193,28 @@ class StockPicking(models.Model):
 					searc_lines = self.env['pos.order.line'].search([('order_id','in',searc_pedido.ids),('product_id','=',x.product_id.id)])
 					# if  searc_lines:
 					x.sale_qty = 0.0
-					if self.seccond_transfer == False:
+					if self.seccond_transfer == False and  self.liqui == False:
 						print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
 						x.update({'price_diference': 0.0})
 						x.update({'return_qty': x.charge_qty})
 						x.return_qty = x.charge_qty
+					elif self.seccond_transfer == True and self.liqui == False:
+						print('bbbbbbbbbbbbbbbbbbbbbbbb')
+						x.update({'price_diference': 0.0})
+						x.update({'return_qty': x.charge_qty})
+						x.return_qty = x.charge_qty
 					else:
-						print('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb')
-						self.diference_total = 0
-						for line in searc_lines:
-							x.sale_qty += line.qty
-						dif += x.charge_qty - x. return_qty - x.sale_qty
-						if x.diference_qty > 0.0 and x.price:
-							val = x.diference_qty * x.price
-							x.write({'price_diference': val})
-							print("DIFERENCIA: ",self.diference_total)
-						self.diference_total = dif
+						print('ccccccccccccccccccc')
+						if self.seccond_transfer == False and self.liqui == True:
+							self.diference_total = 0
+							for line in searc_lines:
+								x.sale_qty += line.qty
+							dif += x.charge_qty - x. return_qty - x.sale_qty
+							self.diference_total = dif
+							if x.diference_qty > 0.0 and x.price:
+								val = x.diference_qty * x.price
+								x.write({'price_diference': val})
+								print("DIFERENCIA: ",self.diference_total)
 			# for x in self.route_moves:
 			# if self.diference_total > 0.0:
 
@@ -380,7 +389,7 @@ class StockPicking(models.Model):
 			else:
 				raise ValidationError('Este empleado no tiene direccion privada, asignale una direccion')
 			self.ruta_liquidada = True
-			# self.liquida_ruta = False
+		self.ruta_liquidada = True
 
 
 
