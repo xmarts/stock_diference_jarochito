@@ -207,8 +207,8 @@ class StockPicking(models.Model):
 						print('ccccccccccccccccccc')
 						if self.seccond_transfer == False and self.liqui == True:
 							self.diference_total = 0
-							for line in searc_lines.ids:
-								if searc_pedido.state == 'paid':
+							for line in searc_lines:
+								if searc_pedido.ids.state == 'paid':
 									x.sale_qty += line.qty
 							dif += x.charge_qty - x. return_qty - x.sale_qty
 							self.diference_total = dif
