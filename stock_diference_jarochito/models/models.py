@@ -187,30 +187,26 @@ class StockPicking(models.Model):
 
 
 			if self.interno == True:
-				searc_pedido = self.env['pos.order'].search([('session_id','=',self.pos_secion.id),])
+				searc_pedido = self.env['pos.order'].search([('session_id','=',self.pos_secion.id),('state','=','paid')])
 				dif = 0.0
 				for x in self.route_moves:
 					searc_lines = self.env['pos.order.line'].search([('order_id','in',searc_pedido.ids),('product_id','=',x.product_id.id)])
 					# if  searc_lines:
 					x.sale_qty = 0.0
 					if self.seccond_transfer == False and  self.liqui == False:
-						print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
 						x.update({'price_diference': 0.0})
 						x.update({'return_qty': x.charge_qty})
 						x.return_qty = x.charge_qty
 					elif self.seccond_transfer == True and self.liqui == False:
-						print('bbbbbbbbbbbbbbbbbbbbbbbb')
 						x.update({'price_diference': 0.0})
 						x.update({'return_qty': x.charge_qty})
 						x.return_qty = x.charge_qty
 					else:
-						print('ccccccccccccccccccc')
 						if self.seccond_transfer == False and self.liqui == True:
 							self.diference_total = 0
 							for line in searc_lines:
-								for ids in searc_pedido: 
-									if ids.state == 'paid':
-										x.sale_qty += line.qty
+								print('ssssssssssssssss',line.qty)
+								x.sale_qty += line.qty
 							dif += x.charge_qty - x. return_qty - x.sale_qty
 							self.diference_total = dif
 							if x.diference_qty > 0.0 and x.price:
