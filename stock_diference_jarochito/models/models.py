@@ -181,7 +181,7 @@ class StockPicking(models.Model):
 		# self._function_route_moves()
 		self.diference_total = 0.0
 		if self.pos_confi.validate_session == False:
-			mobile_orders = self.env['mobile.order'].search([('pos_session','=', self.pos_secion)])
+			mobile_orders = self.env['mobile.order'].search([('pos_session','=', self.pos_secion.id)])
 			for rec in mobile_orders:
 				if not rec.pos_order_id:
 					rec.action_create_pos_order()
