@@ -364,20 +364,22 @@ class StockPicking(models.Model):
 					self.subpedido_id.amount_total = total	
 					self.subpedido_id.amount_paid = total	
 					self.subpedido_id.amount_tax = impuestos	
-					statement = self.env['account.bank.statement'].search([('pos_session_id','=',self.pos_secion.id)])
-					vars = {
-						'name' : so.name,
-						'date' : date.today(),
-						'amount' : total,
-						'account_id' : self.chofer.address_home_id.property_account_receivable_id.id,
-						'statement_id' : statement.id,
-						'journal_id' : self.pos_confi.journal_id.id,
-						'ref' : self.pos_secion.name,
-						'sequence' : '1',
-						'company_id' : self.pos_confi.company_id.id,
-						'pos_statement_id' : self.subpedido_id.id,
-						'partner_id' : self.chofer.address_home_id.id,
-					}	
+					statement = self.env['account.bank.statement'].search([('pos_session_id','=',self.pos_secion.id)], limit=1)
+					vars = {}
+					for banks in statement:
+						vars = {
+							'name' : so.name,
+							'date' : date.today(),
+							'amount' : total,
+							'account_id' : self.chofer.address_home_id.property_account_receivable_id.id,
+							'statement_id' : statement.id,
+							'journal_id' : self.pos_confi.journal_id.id,
+							'ref' : self.pos_secion.name,
+							'sequence' : '1',
+							'company_id' : self.pos_confi.company_id.id,
+							'pos_statement_id' : self.subpedido_id.id,
+							'partner_id' : self.chofer.address_home_id.id,
+						}
 					self.env['account.bank.statement.line'].create(vars)
 				try:
 					stockpicking.action_confirm()
