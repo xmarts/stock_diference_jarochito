@@ -189,7 +189,7 @@ class StockPicking(models.Model):
 
 
 			if self.interno == True:
-				searc_pedido = self.env['pos.order'].search([('session_id','=',self.pos_secion.id),('state','=','paid')])
+				searc_pedido = self.env['pos.order'].search([('session_id','=',self.pos_secion.id),('state','in', ('paid', 'done', 'invoiced'))])
 				dif = 0.0
 				for x in self.route_moves:
 					searc_lines = self.env['pos.order.line'].search([('order_id','in',searc_pedido.ids),('product_id','=',x.product_id.id)])
