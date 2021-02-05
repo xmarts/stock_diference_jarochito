@@ -123,6 +123,24 @@
 
                         <br /><br />
 
+                        <t t-set="credito" t-value="0"/>
+                        <t t-set="contado" t-value="0"/>
+                        <t t-set="total" t-value="0"/>
+                        <t t-foreach="o.statement_ids" t-as="rec">
+                            <t t-foreach="rec.line_ids" t-as="line">
+                                <t t-if="line.journal_id == o.config_id.journal_credit">
+                                    <t t-set="credito" t-value="credito + line.amount"/>
+                                </t>
+                                <t t-else="">
+                                    <t t-set="contado" t-value="contado + line.amount"/>
+                                </t>
+                                <t t-set="total" t-value="total + line.amount"/>
+                            </t>
+                        </t>
+                        <strong><span>Total Credito: </span></strong><span t-esc="credito"/><br/>
+                        <strong><span>Total Contado: </span></strong><span t-esc="contado"/><br/>
+                        <strong><span>Total: </span></strong><span t-esc="total"/><br/>
+
                         <table class="table table-sm o_main_table">
                             <thead>
                                 <tr>
@@ -137,13 +155,31 @@
                             </thead>
                             <tbody class="sale_tbody">
                                 <t t-foreach="o.statement_ids" t-as="rec">
+                                    <t t-set="cont" t-value="0"/>
+                                    <t t-set="cont2" t-value="0"/>
                                     <t t-foreach="rec.line_ids" t-as="line">
-                                        <tr>
-                                            <td><span t-field="line.ref"/></td>
-                                            <td><span t-field="line.partner_id.name"/></td>
-                                            <td><span t-field="rec.journal_id.name"/></td>
-                                            <td><span t-field="line.amount"/></td>
-                                        </tr>
+                                        <t t-if="line.journal_id == o.config_id.journal_credit">
+                                            <tr t-if="cont==0"><td>Credito</td></tr>
+                                            <tr>
+                                                <td><span t-field="line.ref"/></td>
+                                                <td><span t-field="line.partner_id.name"/></td>
+                                                <td><span t-field="rec.journal_id.name"/></td>
+                                                <td><span t-field="line.amount"/></td>
+                                                <t t-set="cont" t-value="cont + 1"/>
+                                            </tr>
+                                        </t>
+                                        <t t-else="">
+                                            <tr t-if="cont2==0"><td>Contado</td></tr>
+                                            <tr>
+                                                <td><span t-field="line.ref"/></td>
+                                                <td><span t-field="line.partner_id.name"/></td>
+                                                <td><span t-field="rec.journal_id.name"/></td>
+                                                <td><span t-field="line.amount"/></td>
+                                                <t t-set="cont2" t-value="cont2 + 1"/>
+                                            </tr>
+                                        </t>
+                                        
+                                        
                                     </t>
                                 </t>
                             </tbody>

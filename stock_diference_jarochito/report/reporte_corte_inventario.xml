@@ -127,7 +127,29 @@
 								</t>
 							</tbody>
 						</table>
+							<t t-set="carga" t-value="0"/>
+							<t t-set="retorna" t-value="0"/>
+							<t t-set="vende" t-value="0"/>
+							<t t-set="dif" t-value="0"/>
+							<t t-foreach="o.route_moves" t-as="line">
+								<t t-set="carga" t-value="carga + line.charge_qty"/>
+								<t t-set="retorna" t-value="retorna + line.return_qty"/>
+								<t t-set="vende" t-value="vende + line.sale_qty"/>
+								<t t-set="dif" t-value="dif + line.diference_qty"/>
 
+							</t>
+							<div class="row">
+                                <div class="col-4">
+                                </div>
+                                <div class="col-4">
+                                </div>
+                                <div class="col-4">
+									<strong><span>Total Cargado: </span></strong><span t-esc="carga"/><br/>
+									<strong><span>Total Retornado: </span></strong><span t-esc="retorna"/><br/>
+									<strong><span>Total Vendido: </span></strong><span t-esc="vende"/><br/>
+									<strong><span>Total Diferencia: </span></strong><span t-esc="dif"/><br/>
+                                </div>
+                            </div>
 					</div>
 				</t>
 			</t>
