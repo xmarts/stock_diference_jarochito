@@ -105,24 +105,6 @@
                             </div>
                         </div>
 
-                        <table class="table table-sm o_main_table">
-                           
-                          <tr>
-                            <td>Saldo apertura: <span t-field="o.cash_register_balance_start"/> </td>
-                            <td>Saldo real de cierre: <span t-field="o.cash_register_balance_end_real"/> </td>
-                          </tr>
-                           <tr>
-                            <td>Total transacciones: <span t-field="o.cash_register_total_entry_encoding"/></td>
-                            <td>Diferencia: <span t-field="o.cash_register_difference"/></td>
-                          </tr>
-                             <tr>
-                            <td>Saldo teorica de cierre: <span t-field="o.cash_register_balance_end"/></td>
-                            <td></td>
-                          </tr>
-                        </table>
-
-                        <br /><br />
-
                         <t t-set="credito" t-value="0"/>
                         <t t-set="contado" t-value="0"/>
                         <t t-set="total" t-value="0"/>
@@ -137,6 +119,24 @@
                                 <t t-set="total" t-value="total + line.amount"/>
                             </t>
                         </t>
+                        <table class="table table-sm o_main_table">
+                           
+                          <tr>
+                            <td>Saldo apertura: <span t-field="o.cash_register_balance_start"/> </td>
+                            <td>Saldo real de cierre: <span t-field="o.cash_register_balance_end_real"/> </td>
+                          </tr>
+                           <tr>
+                            <td>Total transacciones: <span t-field="total"/></td>
+                            <td>Diferencia: <span t-field="o.cash_register_difference"/></td>
+                          </tr>
+                             <tr>
+                            <td>Saldo teorica de cierre: <span t-field="o.cash_register_balance_end"/></td>
+                            <td></td>
+                          </tr>
+                        </table>
+
+                        <br /><br />
+
                         <strong><span>Total Credito: </span></strong><span t-esc="credito"/><br/>
                         <strong><span>Total Contado: </span></strong><span t-esc="contado"/><br/>
                         <strong><span>Total: </span></strong><span t-esc="total"/><br/>
