@@ -126,7 +126,7 @@
                             <td>Saldo real de cierre: <span t-field="o.cash_register_balance_end_real"/> </td>
                           </tr>
                            <tr>
-                            <td>Total transacciones: <span t-field="total"/></td>
+                            <td>Total transacciones: <span t-esc="total"/></td>
                             <td>Diferencia: <span t-field="o.cash_register_difference"/></td>
                           </tr>
                              <tr>
