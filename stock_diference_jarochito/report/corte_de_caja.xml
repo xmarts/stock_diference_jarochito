@@ -150,6 +150,7 @@
                                     <th class="text-left">Referencia</th>
                                     <th class="text-left">Cliente</th>
                                     <th class="text-left">Diario</th>
+                                    <th class="text-left">Zona</th>
                                     <th class="text-left">Total</th>
                                 </tr>
                             </thead>
@@ -164,6 +165,7 @@
                                                 <td><span t-field="line.ref"/></td>
                                                 <td><span t-field="line.partner_id.name"/></td>
                                                 <td><span t-field="rec.journal_id.name"/></td>
+                                                <td><span t-field="line.partner_id.zona.name"/></td>
                                                 <td><span t-field="line.amount"/></td>
                                                 <t t-set="cont" t-value="cont + 1"/>
                                             </tr>
@@ -174,6 +176,7 @@
                                                 <td><span t-field="line.ref"/></td>
                                                 <td><span t-field="line.partner_id.name"/></td>
                                                 <td><span t-field="rec.journal_id.name"/></td>
+                                                <td><span t-field="line.partner_id.zona.name"/></td>
                                                 <td><span t-field="line.amount"/></td>
                                                 <t t-set="cont2" t-value="cont2 + 1"/>
                                             </tr>
