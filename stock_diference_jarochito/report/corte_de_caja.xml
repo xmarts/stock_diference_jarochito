@@ -107,8 +107,17 @@
 
                         <t t-set="credito" t-value="0"/>
                         <t t-set="contado" t-value="0"/>
-                        <t t-set="total" t-value="0"/>
                         <t t-foreach="o.statement_ids" t-as="rec">
+                            <t t-foreach="rec.line_ids" t-as="line">
+                                <t t-set="contado" t-value="contado + line.amount"/>
+
+                            </t>
+                        </t>
+                        <t t-foreach="o.pos_credit_id" t-as="credi">
+                             <t t-set="credito" t-value="credito + credi.amount"/>
+                        </t>
+                        <t t-set="total" t-value="credito + contado"/>
+                        <!-- <t t-foreach="o.statement_ids" t-as="rec">
                             <t t-foreach="rec.line_ids" t-as="line">
                                 <t t-if="line.journal_id == o.config_id.journal_credit">
                                     <t t-set="credito" t-value="credito + line.amount"/>
@@ -118,7 +127,7 @@
                                 </t>
                                 <t t-set="total" t-value="total + line.amount"/>
                             </t>
-                        </t>
+                        </t> -->
                         <table class="table table-sm o_main_table">
                            
                           <tr>
@@ -144,7 +153,7 @@
                         <table class="table table-sm o_main_table">
                             <thead>
                                 <tr>
-                                    <th colspan="2" class="text-center"><h4>Resumen de pagos</h4></th>
+                                    <th colspan="2" class="text-center"><h4>Resumen de pagos en Efectivo</h4></th>
                                 </tr>
                                 <tr>
                                     <th class="text-left">Referencia</th>
@@ -156,10 +165,45 @@
                             </thead>
                             <tbody class="sale_tbody">
                                 <t t-foreach="o.statement_ids" t-as="rec">
-                                    <t t-set="cont" t-value="0"/>
-                                    <t t-set="cont2" t-value="0"/>
                                     <t t-foreach="rec.line_ids" t-as="line">
-                                        <t t-if="line.journal_id == o.config_id.journal_credit">
+                                         <tr>
+                                                <td><span t-field="line.ref"/></td>
+                                                <td><span t-field="line.partner_id.name"/></td>
+                                                <td><span t-field="line.journal_id.name"/></td>
+                                                <td><span t-field="line.partner_id.zona.name"/></td>
+                                                <td><span t-field="line.amount"/></td>
+                                            </tr>
+                                    </t>
+                                </t>
+                            </tbody>
+                        </table>
+                        <table class="table table-sm o_main_table">
+                            <thead>
+                                <tr>
+                                    <th colspan="2" class="text-center"><h4>Resumen de pagos a Credito</h4></th>
+                                </tr>
+                                <tr>
+                                    <th class="text-left">Referencia</th>
+                                    <th class="text-left">Cliente</th>
+                                    <th class="text-left">Diario</th>
+                                    <th class="text-left">Zona</th>
+                                    <th class="text-left">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody class="sale_tbody">
+                                <t t-foreach="o.pos_credit_id" t-as="line_credi">
+                                    <tr>
+                                        <td><span t-field="line_credi.name"/></td>
+                                        <td><span t-field="line_credi.partner_id.name"/></td>
+                                        <td><span t-field="line_credi.journal_id.name"/></td>
+                                        <td><span t-field="line_credi.partner_id.zona.name"/></td>
+                                        <td><span t-field="line_credi.amount"/></td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+
+                                       <!--  <t t-if="line.journal_id == o.config_id.journal_credit">
                                             <tr t-if="cont==0"><td>Credito</td></tr>
                                             <tr>
                                                 <td><span t-field="line.ref"/></td>
@@ -181,12 +225,8 @@
                                                 <t t-set="cont2" t-value="cont2 + 1"/>
                                             </tr>
                                         </t>
+                                         -->
                                         
-                                        
-                                    </t>
-                                </t>
-                            </tbody>
-                        </table>
                         
                     </div>
                 </t>           
