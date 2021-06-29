@@ -428,14 +428,13 @@ class PosSession(models.Model):
 			zona = self.env['res.zona'].search([('pos_id', '=', rec.config_id.id)])
 			for z in zona:
 				print('zzzzzzzzzzzzzzzzzzzzzzzzzzzz', z.codigo)
-				res = self.env['res.partner'].search([('zona', '=', z.id)])
-				for partner in res:
-					print('partner', partner.name)
-					emp = self.env['hr.employee'].search([('address_home_id', '=', partner.id)])
-					for empleado in emp:
-						print('EMPLEADOOOOOOOOOOOOOOOO', empleado.name)
-						if empleado.ruta_open == True:
-							empleado.ruta_open = False
+			# res = self.env['res.partner'].search([('zona', '=', z.id)])
+			# for partner in res:
+			# 	print('partner', partner.name)
+			emp = self.env['hr.employee'].search([('zona', '=', zona.id)])
+			for empleado in emp:
+				print('EMPLEADOOOOOOOOOOOOOOOO', empleado.name)
+				empleado.ruta_open = False
 
 			pos_order = self.env['pos.order'].search([('session_id', '=', rec.id)])
 			for order in pos_order:
