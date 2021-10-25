@@ -168,7 +168,7 @@
                                     <t t-foreach="rec.line_ids" t-as="line">
                                          <tr>
                                                 <td><span t-field="line.ref"/></td>
-                                                <td><span t-field="line.partner_id.name"/></td>
+                                                <td><span t-field="line.pos_statement_id.direccion_cliente_id.name"/></td>
                                                 <td><span t-field="line.journal_id.name"/></td>
                                                 <td><span t-field="line.partner_id.zona.name"/></td>
                                                 <td><span t-field="line.amount"/></td>
