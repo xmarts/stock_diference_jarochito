@@ -1,116 +1,60 @@
 <odoo>
   <data>
-  <!-- model.name inherit form view -->
-  <record id="add_field_picking_pos_session" model="ir.ui.view">
-    <field name="name">add_field_picking_pos_session</field>
-    <field name="model">pos.session</field>
-    <field name="inherit_id" ref="point_of_sale.view_pos_session_form"/>
-    <field name="arch" type="xml">
-      <field name="config_id" position="after">
-        <field name="stock_picking_id" />
-      </field>
-    </field>
-  </record>
-  <record id="add_field_route_moves" model="ir.ui.view">
-    <field name="name">add_field_route_moves</field>
-    <field name="model">stock.picking</field>
-    <field name="inherit_id" ref="stock.view_picking_form"/>
-    <field name="arch" type="xml">
-      <xpath expr="//notebook"  position="inside">
-        <page string="Diferencia Ruta"  attrs="{'invisible':[('interno','!=',True)]}"  >
-          <field name="route_moves" >
-            <tree editable="bottom" >
-              <field name="product_id" />
-              <field name="charge_qty" />
-              <field name="return_qty" />
-              <field name="sale_qty" />
-              <field name="diference_qty" />
-              <field name="price" />
-              <field name="price_diference" />
-              <field name="stock_picking_id" invisible="1" />
-            </tree>
-          </field>
-        </page>
-      </xpath>
-      <xpath expr="//field[@name='picking_type_id']" position="after">
-        <field name="interno"/>
-        <field name="ruta" attrs="{'invisible':[('interno','!=',True)],'required':[('interno','=',True)]}" /> 
-        <field name="pos_confi" attrs="{'invisible':[('interno','!=',True)]}" />  
-        <field name="chofer" attrs="{'invisible':[('interno','!=',True)]}" />
-        <field name="total_difencia" invisible="0"/>
-        <field name="diference_total" invisible="0"/>          
-        <field name="pos_secion" attrs="{'invisible':[('interno','!=',True)],'required':[('interno','=',True)]}" />
-        <button name="change_route_moves" string="Calcular Carga" type="object" attrs="{'invisible':[('interno','!=',True)]}" class="oe_edit_only"/> 
-        <button name="product_pos" string="Calcular Diferencia" type="object" attrs="{'invisible':[('interno','!=',True)]}" class="oe_edit_only"/> 
-      </xpath>
-
-
-      <xpath expr="//button[@name='button_scrap']" position="after">
-        <button name="create_venta_dos" string="Liquidar Ruta" type="object" class="oe_highlight" attrs="{'invisible':[('ruta_liquidada','=',True)]}" />
-      </xpath> 
-      <xpath expr="//field[@name='origin']" position="after">
-
-        <field name="subpedido_id" attrs="{'invisible':['|',('total_difencia','=',0),'|',('interno','!=',True)]}" />
-        <field name="liquida_ruta" attrs="{'invisible':['|',('total_difencia','=',0),'|',('interno','!=',True)]}" readonly="1"/>
-        <field name="ruta_liquidada" invisible="1"/>
-        <field name="seccond_transfer" invisible="0"/>
-
-        
-      </xpath>
-    </field>
-  </record>
-
-
-  <record id="add_replace_campos" model="ir.ui.view">
-    <field name="name">add_replace_campos</field>
-    <field name="model">stock.return.picking</field>
-    <field name="inherit_id" ref="stock.view_stock_return_picking_form"/>
-    <field name="arch" type="xml">
-      <xpath expr="//footer" position="replace">        
-     
-            <footer>
-                <button name="returs_pedido" string="DEVOLVER" type="object" class="btn-primary"/>
-                <button string="Cancel" class="btn-secondary" special="cancel" />
-            </footer>
-      </xpath>
-
-
+    <!-- explicit list view definition -->
+<!--
+    <record model="ir.ui.view" id="stock_diference_jarochito.list">
+      <field name="name">stock_diference_jarochito list</field>
+      <field name="model">stock_diference_jarochito.stock_diference_jarochito</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="name"/>
+          <field name="value"/>
+          <field name="value2"/>
+        </tree>
       </field>
     </record>
-    <record id="add_button_force_cancel" model="ir.ui.view">
-    <field name="name">add_button_force_cancel</field>
-    <field name="model">pos.order</field>
-    <field name="inherit_id" ref="point_of_sale.view_pos_pos_form"/>
-    <field name="arch" type="xml">
-      <xpath expr="//header" position="inside">  
-          <button name="force_cancel" string="FORZAR CANCELACION" type="object" class="btn-primary" confirm="Esta accion no se puede deshacer, quiere continuar?"/>
-      </xpath>
+-->
 
+    <!-- actions opening views on models -->
+<!--
+    <record model="ir.actions.act_window" id="stock_diference_jarochito.action_window">
+      <field name="name">stock_diference_jarochito window</field>
+      <field name="res_model">stock_diference_jarochito.stock_diference_jarochito</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+-->
 
+    <!-- server action to the one above -->
+<!--
+    <record model="ir.actions.server" id="stock_diference_jarochito.action_server">
+      <field name="name">stock_diference_jarochito server</field>
+      <field name="model_id" ref="model_stock_diference_jarochito_stock_diference_jarochito"/>
+      <field name="state">code</field>
+      <field name="code">
+        action = {
+          "type": "ir.actions.act_window",
+          "view_mode": "tree,form",
+          "res_model": model._name,
+        }
       </field>
     </record>
+-->
 
-    <record id="add_button_validate" model="ir.ui.view">
-    <field name="name">add button validate</field>
-    <field name="model">pos.config</field>
-    <field name="inherit_id" ref="point_of_sale.pos_config_view_form"/>
-    <field name="arch" type="xml">
-      <xpath expr="//div[@id='posbox_reference']" position="after">
-                  <div class="row mt16 o_settings_container" id="sesion_app">
-                      <div class="col-xs-12 col-md-6 o_setting_box" title="Sesion de APP">
-                        <div class="o_setting_left_pane">
-                                <field name="validate_session"/>
-                            </div>
-                          <div class="o_setting_right_pane">
-                              <label for="validate_session" string="Sesion de APP"/>
-                              <div class="text-muted">
-                                    Valida la session del App
-                                </div>
-                          </div>
-                      </div>
-                  </div>
-      </xpath>
-      </field>
-    </record>
+    <!-- Top menu item -->
+<!--
+    <menuitem name="stock_diference_jarochito" id="stock_diference_jarochito.menu_root"/>
+-->
+    <!-- menu categories -->
+<!--
+    <menuitem name="Menu 1" id="stock_diference_jarochito.menu_1" parent="stock_diference_jarochito.menu_root"/>
+    <menuitem name="Menu 2" id="stock_diference_jarochito.menu_2" parent="stock_diference_jarochito.menu_root"/>
+-->
+    <!-- actions -->
+<!--
+    <menuitem name="List" id="stock_diference_jarochito.menu_1_list" parent="stock_diference_jarochito.menu_1"
+              action="stock_diference_jarochito.action_window"/>
+    <menuitem name="Server to list" id="stock_diference_jarochito" parent="stock_diference_jarochito.menu_2"
+              action="stock_diference_jarochito.action_server"/>
+-->
   </data>
 </odoo>
